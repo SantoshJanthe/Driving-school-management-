@@ -2,7 +2,9 @@
 
 Cloud-based driving school management for a single school, with a multi-tenant-ready data model (`school_id` on every row, enforced by Postgres Row Level Security). Staff sign in, and the app tracks applicants, training, payments, documents and an audit trail.
 
-This repository currently contains **Milestone 1 (scaffold)** and **Milestone 2 (authentication, roles, dashboard shell)**. Applicant management, training, payments, documents, staff administration and audit screens are routed and permission-guarded, and show a placeholder until their milestone.
+This repository contains the scaffold, authentication, the dashboard shell, and applicant management. Training, payments, documents, staff administration and audit screens are routed and permission-guarded, and show a placeholder until their milestone.
+
+Applicants: an admin (or a staff user with `create_applicant`) can add a record from **New applicant** — name, Indian mobile, address, pincode, Aadhaar last 4 only, licence category, fee, and status. The list searches by name, phone, or application number. The profile shows the overview and history; edit, status change, and admin delete (type the name to confirm) are on the same page.
 
 ## Stack
 

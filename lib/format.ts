@@ -56,6 +56,14 @@ export function formatDateTime(value: string | Date | null | undefined): string 
   }).format(d);
 }
 
+/** 98765 43210. Falls back to the raw value when it is not 10 digits. */
+export function formatPhone(phone: string | null | undefined): string {
+  if (!phone) return "—";
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length === 10) return `${digits.slice(0, 5)} ${digits.slice(5)}`;
+  return phone;
+}
+
 /** 98XXXXXXXX — keeps the first two digits of an Indian mobile number. */
 export function maskPhone(phone: string | null | undefined): string {
   if (!phone) return "—";
