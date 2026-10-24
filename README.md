@@ -44,8 +44,8 @@ Open [http://localhost:3000](http://localhost:3000). You are redirected to the s
 
 `supabase/seed.sql` creates one school and two confirmed users. Development only — do not run it against staging or production.
 
-| Role  | Email                    | Password     |
-| ----- | ------------------------ | ------------ |
+| Role  | Email                    | Password      |
+| ----- | ------------------------ | ------------- |
 | Admin | `admin@sample-dsm.local` | `Admin@12345` |
 | Staff | `staff@sample-dsm.local` | `Staff@12345` |
 
@@ -93,14 +93,14 @@ The committed file is a hand-maintained mirror of the migration, in the same sha
 
 ## Scripts
 
-| Script            | What it does                                        |
-| ----------------- | --------------------------------------------------- |
-| `npm run dev`     | Next.js dev server                                  |
-| `npm run build`   | Production build                                    |
-| `npm run lint`    | ESLint                                              |
-| `npm run typecheck` | `tsc --noEmit`                                    |
-| `npm run format`  | Prettier                                            |
-| `npm run db:test` | RLS test against `SUPABASE_DB_URL`                  |
+| Script              | What it does                       |
+| ------------------- | ---------------------------------- |
+| `npm run dev`       | Next.js dev server                 |
+| `npm run build`     | Production build                   |
+| `npm run lint`      | ESLint                             |
+| `npm run typecheck` | `tsc --noEmit`                     |
+| `npm run format`    | Prettier                           |
+| `npm run db:test`   | RLS test against `SUPABASE_DB_URL` |
 
 ## How auth works
 
@@ -110,9 +110,11 @@ The committed file is a hand-maintained mirror of the migration, in the same sha
 - `lib/auth/permissions.ts` reads the `profiles.permissions` JSONB. Admins pass every check. `requireAdmin()` and `requirePermission()` guard pages; Row Level Security is what actually enforces access.
 - Password reset: `/forgot-password` emails a link, `/auth/callback` exchanges the code, `/reset-password` sets the new password. The response does not reveal whether an email address exists.
 
-## Razorpay MCP
+## Razorpay
 
-Cursor can call Razorpay through their hosted MCP server (`.cursor/mcp.json`). Orders, payment links, and refunds are created on Razorpay's side. Card numbers never pass through this app or this repository.
+The **Payments** page calls Razorpay’s Payment Links API (`POST /v1/payment_links`). The payer completes checkout on Razorpay’s page. When Razorpay sends `payment_link.paid` to `/api/razorpay/webhook`, the fee is written into the ledger. Card numbers never pass through this app.
+
+Cursor can also call the same account through the hosted MCP server (`.cursor/mcp.json`).
 
 1. In the Razorpay dashboard, open Settings → API Keys and copy the test key id and secret (`rzp_test_...`).
 2. Put them in `.env.local` (this file is gitignored):
