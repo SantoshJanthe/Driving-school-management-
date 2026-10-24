@@ -78,7 +78,15 @@ export async function uploadDocument(_prev: UploadState, formData: FormData): Pr
   revalidatePath(`/applicants/${applicant.id}/documents`);
   revalidatePath("/documents");
   revalidatePath(`/applicants/${applicant.id}/history`);
-  redirect(`/applicants/${applicant.id}/documents?notice=uploaded`);
+  const requested = String(formData.get("return_to") ?? "");
+  const fallback = `/applicants/${applicant.id}/documents`;
+  const safe =
+    requested === "/documents" ||
+    requested.startsWith("/documents?") ||
+    requested.startsWith("/applicants/")
+      ? requested.split("?")[0]
+      : fallback;
+  redirect(`${safe}?notice=uploaded`);
 }
 
 export async function archiveDocument(formData: FormData) {

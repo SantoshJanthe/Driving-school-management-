@@ -6,7 +6,7 @@ This repository contains the scaffold, authentication, the dashboard shell, and 
 
 Applicants: an admin (or a staff user with `create_applicant`) can add a record from **New applicant** — name, Indian mobile, address, pincode, Aadhaar last 4 only, licence category, fee, and status. The list searches by name, phone, or application number. The profile shows the overview and history; edit, status change, and admin delete (type the name to confirm) are on the same page.
 
-Documents: upload a PDF, JPG, PNG, or WEBP (up to 10 MB) on an applicant’s Documents tab. The school-wide Documents page searches by applicant, application number, or file name. View and download are logged. Only an admin can archive or delete a file. Files stay private.
+Documents: **Add document** on the Documents page (or the applicant’s Documents tab) uploads a PDF, JPG, PNG, or WEBP up to 10 MB and attaches it to an applicant. Search by applicant, application number, or file name. View and download are logged. Only an admin can archive or delete a file. Files stay private.
 
 ## Stack
 

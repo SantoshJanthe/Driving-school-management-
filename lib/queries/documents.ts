@@ -22,6 +22,17 @@ function one<T>(value: T | T[] | null | undefined): T | null {
   return value ?? null;
 }
 
+export async function listApplicantsForUpload() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("applicants")
+    .select("id, full_name, application_number")
+    .order("full_name")
+    .limit(200);
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
 export async function listDocuments(filters: {
   applicantId?: string;
   q?: string;
