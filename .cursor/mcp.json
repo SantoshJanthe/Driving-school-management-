@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "rzp-mcp-server": {
+      "command": "bash",
+      "args": ["${workspaceFolder}/.cursor/razorpay-mcp.sh"]
+    }
+  }
+}

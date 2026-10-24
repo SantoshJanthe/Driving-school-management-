@@ -110,6 +110,22 @@ The committed file is a hand-maintained mirror of the migration, in the same sha
 - `lib/auth/permissions.ts` reads the `profiles.permissions` JSONB. Admins pass every check. `requireAdmin()` and `requirePermission()` guard pages; Row Level Security is what actually enforces access.
 - Password reset: `/forgot-password` emails a link, `/auth/callback` exchanges the code, `/reset-password` sets the new password. The response does not reveal whether an email address exists.
 
+## Razorpay MCP
+
+Cursor can call Razorpay through their hosted MCP server (`.cursor/mcp.json`). Orders, payment links, and refunds are created on Razorpay's side. Card numbers never pass through this app or this repository.
+
+1. In the Razorpay dashboard, open Settings → API Keys and copy the test key id and secret (`rzp_test_...`).
+2. Put them in `.env.local` (this file is gitignored):
+
+```bash
+RAZORPAY_KEY_ID=rzp_test_...
+RAZORPAY_KEY_SECRET=...
+```
+
+3. Restart Cursor. The `rzp-mcp-server` tools appear under MCP. The launcher reads `.env.local` and passes the token only as an environment variable.
+
+Do not paste the secret into chat, and do not commit `.env.local`. Switch to live keys only when you are ready to take real payments.
+
 ## Layout
 
 ```text
