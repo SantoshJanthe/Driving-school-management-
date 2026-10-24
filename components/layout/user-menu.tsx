@@ -18,20 +18,30 @@ import {
 import { logout } from "@/lib/actions/auth";
 import { initials } from "@/lib/format";
 
-export function UserMenu() {
+export function UserMenu({ onDark = false }: { onDark?: boolean }) {
   const profile = useProfile();
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-10 gap-2 px-2" aria-label="Account menu">
-          <Avatar className="size-8">
-            <AvatarFallback className="text-xs">{initials(profile.full_name)}</AvatarFallback>
+        <Button
+          variant="ghost"
+          className={
+            onDark
+              ? "h-8 gap-2 px-2 text-white hover:bg-white/10 hover:text-white"
+              : "h-8 gap-2 px-2"
+          }
+          aria-label="Account menu"
+        >
+          <Avatar className="size-6">
+            <AvatarFallback className={onDark ? "bg-white text-[10px] text-[#24292f]" : "text-[10px]"}>
+              {initials(profile.full_name)}
+            </AvatarFallback>
           </Avatar>
           <span className="hidden max-w-32 truncate text-sm font-medium sm:inline">
             {profile.role === "admin" ? "Admin" : profile.full_name.split(" ")[0]}
           </span>
-          <ChevronDown className="size-4 text-muted-foreground" aria-hidden />
+          <ChevronDown className={onDark ? "size-4 text-white/70" : "size-4 text-muted-foreground"} aria-hidden />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64">

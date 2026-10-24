@@ -48,7 +48,7 @@ export function MobileNav() {
                 aria-current={active ? "page" : undefined}
                 className={cn(
                   "flex h-16 flex-col items-center justify-center gap-1 text-[11px] font-medium",
-                  active ? "text-primary" : "text-muted-foreground",
+                  active ? "text-[#1f883d]" : "text-[#59636e]",
                 )}
               >
                 <item.icon className="size-5" aria-hidden />
@@ -65,7 +65,7 @@ export function MobileNav() {
                   type="button"
                   className={cn(
                     "flex h-16 w-full flex-col items-center justify-center gap-1 text-[11px] font-medium",
-                    moreActive ? "text-primary" : "text-muted-foreground",
+                    moreActive ? "text-[#1f883d]" : "text-[#59636e]",
                   )}
                 >
                   <Menu className="size-5" aria-hidden />
@@ -90,10 +90,10 @@ export function MobileNav() {
                           onClick={() => setOpen(false)}
                           aria-current={active ? "page" : undefined}
                           className={cn(
-                            "flex h-14 items-center gap-3 rounded-xl border px-4 text-sm font-medium",
+                            "flex h-14 items-center gap-3 rounded-md border px-4 text-sm",
                             active
-                              ? "border-primary bg-primary text-primary-foreground"
-                              : "hover:bg-muted",
+                              ? "border-[#d0d7de] bg-[#f6f8fa] font-semibold text-[#1f2328]"
+                              : "border-[#d0d7de] hover:bg-[#f6f8fa]",
                           )}
                         >
                           <item.icon className="size-5" aria-hidden />

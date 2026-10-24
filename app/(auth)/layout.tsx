@@ -3,7 +3,7 @@ import { env } from "@/lib/env";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <main className="flex min-h-dvh flex-col items-center justify-center bg-muted/40 px-4 py-10">
+    <main className="flex min-h-dvh flex-col items-center justify-center bg-[#f6f8fa] px-4 py-10">
       <div className="flex w-full max-w-md flex-col items-center gap-6">
         <div className="flex flex-col items-center gap-3 text-center">
           <SchoolLogo className="size-16" />

@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { isActivePath, visibleNavItems } from "@/components/layout/nav-items";
-import { SchoolLogo } from "@/components/layout/school-logo";
 import { useProfile } from "@/components/providers/permission-provider";
 import { cn } from "@/lib/utils";
 
@@ -14,18 +13,12 @@ export function Sidebar({ schoolName }: { schoolName: string }) {
   const items = visibleNavItems(profile);
 
   return (
-    <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:flex">
-      <Link
-        href="/dashboard"
-        className="flex h-16 items-center gap-3 border-b px-4"
-        aria-label="Go to dashboard"
-      >
-        <SchoolLogo className="size-9" />
-        <span className="truncate text-sm leading-tight font-semibold">{schoolName}</span>
-      </Link>
-
-      <nav aria-label="Main" className="flex-1 overflow-y-auto p-3">
-        <ul className="grid gap-1">
+    <aside className="sticky top-16 hidden h-[calc(100dvh-4rem)] w-60 shrink-0 flex-col border-r border-[#d0d7de] bg-[#f6f8fa] text-[#1f2328] lg:flex">
+      <div className="px-4 pt-4 pb-2 text-xs font-semibold tracking-wide text-[#59636e] uppercase">
+        {schoolName}
+      </div>
+      <nav aria-label="Main" className="flex-1 overflow-y-auto px-3 pb-3">
+        <ul className="grid gap-0.5">
           {items.map((item) => {
             const active = isActivePath(pathname, item.href);
             return (
@@ -34,13 +27,13 @@ export function Sidebar({ schoolName }: { schoolName: string }) {
                   href={item.href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "flex h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors",
+                    "flex h-8 items-center gap-2 rounded-md px-2 text-sm",
                     active
-                      ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                      : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                      ? "bg-white font-semibold text-[#1f2328] shadow-[inset_0_0_0_1px_#d0d7de]"
+                      : "text-[#1f2328] hover:bg-[#eaeef2]",
                   )}
                 >
-                  <item.icon className="size-4 shrink-0" aria-hidden />
+                  <item.icon className="size-4 shrink-0 text-[#59636e]" aria-hidden />
                   {item.label}
                 </Link>
               </li>
@@ -48,9 +41,8 @@ export function Sidebar({ schoolName }: { schoolName: string }) {
           })}
         </ul>
       </nav>
-
-      <div className="border-t p-4 text-xs text-muted-foreground">
-        Signed in as <span className="font-medium text-foreground">{profile.full_name}</span>
+      <div className="border-t border-[#d0d7de] px-4 py-3 text-xs text-[#59636e]">
+        <span className="font-medium text-[#1f2328]">{profile.full_name}</span>
         <br />
         {profile.role === "admin" ? "Administrator" : "Staff"}
       </div>
