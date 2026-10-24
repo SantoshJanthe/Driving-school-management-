@@ -43,4 +43,7 @@ next-env.d.ts
 # supabase cli
 /supabase/.temp
 /supabase/.branches
+
+# private document files when Supabase Storage is not running
+/var/
 !.env.example

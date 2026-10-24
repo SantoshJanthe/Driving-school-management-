@@ -47,8 +47,14 @@ function describe(entry: ApplicantActivity): string {
       return `Payment of ${formatINR(Number(value.amount ?? 0))} added${by}`;
     case "document_uploaded":
       return `Document “${String(value.file_name ?? "")}” uploaded${by}`;
+    case "document_downloaded":
+      return `Document “${String(value.file_name ?? "")}” downloaded${by}`;
+    case "document_archived":
+      return `Document archived${by}`;
     case "deleted":
-      return `Record deleted${by}`;
+      return entry.entity_type === "documents"
+        ? `Document “${String(value.file_name ?? previous.file_name ?? "")}” deleted${by}`
+        : `Record deleted${by}`;
     default:
       return `${entry.action.replace(/_/g, " ")}${by}`;
   }

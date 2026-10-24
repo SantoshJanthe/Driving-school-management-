@@ -56,6 +56,14 @@ export function formatDateTime(value: string | Date | null | undefined): string 
   }).format(d);
 }
 
+/** 420 KB, 1.1 MB. */
+export function formatFileSize(bytes: number | null | undefined): string {
+  const n = bytes ?? 0;
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${Math.round(n / 1024)} KB`;
+  return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 /** 98765 43210. Falls back to the raw value when it is not 10 digits. */
 export function formatPhone(phone: string | null | undefined): string {
   if (!phone) return "—";
