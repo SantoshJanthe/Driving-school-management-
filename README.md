@@ -8,6 +8,8 @@ Applicants: an admin (or a staff user with `create_applicant`) can add a record 
 
 Documents: **Add document** on the Documents page (or the applicant’s Documents tab) uploads a PDF, JPG, PNG, or WEBP up to 10 MB and attaches it to an applicant. Search by applicant, application number, or file name. View and download are logged. Only an admin can archive or delete a file. Files stay private.
 
+Training: the Training page lists one day at a time, with previous, next, and today, plus instructor and vehicle filters. Add a session with date, start, end, vehicle, instructor, status, and remarks. Mark a session completed or absent in one tap, and undo it. An applicant’s Training tab shows progress against the school’s session target. Only an admin can delete a session.
+
 ## Stack
 
 - Next.js 15 (App Router, TypeScript, Server Components and Server Actions)

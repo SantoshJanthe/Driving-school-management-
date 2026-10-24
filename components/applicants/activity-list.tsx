@@ -28,7 +28,12 @@ function describe(entry: ApplicantActivity): string {
         ? `Training session added${by}`
         : `Applicant created${by}`;
     case "updated":
-      return `Details updated${by}`;
+      if (entry.entity_type === "training_sessions" && "status" in value) {
+        return `Training session marked ${String(value.status).replace(/_/g, " ")}${by}`;
+      }
+      return entry.entity_type === "training_sessions"
+        ? `Training session updated${by}`
+        : `Details updated${by}`;
     case "status_changed": {
       const parts: string[] = [];
       if ("application_status" in value) {
@@ -52,9 +57,11 @@ function describe(entry: ApplicantActivity): string {
     case "document_archived":
       return `Document archived${by}`;
     case "deleted":
-      return entry.entity_type === "documents"
-        ? `Document “${String(value.file_name ?? previous.file_name ?? "")}” deleted${by}`
-        : `Record deleted${by}`;
+      if (entry.entity_type === "documents") {
+        return `Document “${String(value.file_name ?? previous.file_name ?? "")}” deleted${by}`;
+      }
+      if (entry.entity_type === "training_sessions") return `Training session deleted${by}`;
+      return `Record deleted${by}`;
     default:
       return `${entry.action.replace(/_/g, " ")}${by}`;
   }
