@@ -1,0 +1,9 @@
+node_modules
+.next
+out
+build
+coverage
+supabase/.temp
+supabase/.branches
+package-lock.json
+lib/database.types.ts
