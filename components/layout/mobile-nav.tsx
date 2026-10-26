@@ -48,7 +48,7 @@ export function MobileNav() {
                 aria-current={active ? "page" : undefined}
                 className={cn(
                   "flex h-16 flex-col items-center justify-center gap-1 text-[11px] font-medium",
-                  active ? "text-[#1f883d]" : "text-[#59636e]",
+                  active ? "text-[#1a1916]" : "text-[#6b6560]",
                 )}
               >
                 <item.icon className="size-5" aria-hidden />
@@ -65,7 +65,7 @@ export function MobileNav() {
                   type="button"
                   className={cn(
                     "flex h-16 w-full flex-col items-center justify-center gap-1 text-[11px] font-medium",
-                    moreActive ? "text-[#1f883d]" : "text-[#59636e]",
+                    moreActive ? "text-[#1a1916]" : "text-[#6b6560]",
                   )}
                 >
                   <Menu className="size-5" aria-hidden />
@@ -92,8 +92,8 @@ export function MobileNav() {
                           className={cn(
                             "flex h-14 items-center gap-3 rounded-md border px-4 text-sm",
                             active
-                              ? "border-[#d0d7de] bg-[#f6f8fa] font-semibold text-[#1f2328]"
-                              : "border-[#d0d7de] hover:bg-[#f6f8fa]",
+                              ? "border-black/10 bg-[#1a1916] font-medium text-[#f7f4ee]"
+                              : "border-black/10 bg-white/70 hover:bg-white",
                           )}
                         >
                           <item.icon className="size-5" aria-hidden />

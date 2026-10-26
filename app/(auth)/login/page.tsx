@@ -30,7 +30,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
           next={safeNext !== "/dashboard" ? safeNext : undefined}
           initialError={error ? ERROR_MESSAGES[error] : undefined}
         />
-        <div className="rounded-md border border-[#d0d7de] bg-[#f6f8fa] px-3 py-2 text-xs text-[#1f2328]">
+        <div className="rounded-xl border border-black/10 bg-[#f7f4ee] px-3 py-3 text-xs text-[#1a1916]">
           <p className="font-semibold">Demo accounts</p>
           <p className="mt-1">
             Admin <span className="font-mono">admin@sample-dsm.local</span> /{" "}

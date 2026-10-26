@@ -34,14 +34,19 @@ export function UserMenu({ onDark = false }: { onDark?: boolean }) {
           aria-label="Account menu"
         >
           <Avatar className="size-6">
-            <AvatarFallback className={onDark ? "bg-white text-[10px] text-[#24292f]" : "text-[10px]"}>
+            <AvatarFallback
+              className={onDark ? "bg-white text-[10px] text-[#24292f]" : "text-[10px]"}
+            >
               {initials(profile.full_name)}
             </AvatarFallback>
           </Avatar>
           <span className="hidden max-w-32 truncate text-sm font-medium sm:inline">
             {profile.role === "admin" ? "Admin" : profile.full_name.split(" ")[0]}
           </span>
-          <ChevronDown className={onDark ? "size-4 text-white/70" : "size-4 text-muted-foreground"} aria-hidden />
+          <ChevronDown
+            className={onDark ? "size-4 text-white/70" : "size-4 text-muted-foreground"}
+            aria-hidden
+          />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64">

@@ -10,13 +10,13 @@ export function AppShell({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-dvh flex-col bg-white">
+    <div className="flex min-h-dvh flex-col">
       <GlobalHeader schoolName={schoolName} />
       <div className="flex min-h-0 flex-1">
         <Sidebar schoolName={schoolName} />
         <div className="flex min-w-0 flex-1 flex-col">
           <PageTitleBar />
-          <main className="mx-auto w-full max-w-6xl flex-1 p-4 pb-24 md:p-6 lg:pb-6">
+          <main className="page-enter mx-auto w-full max-w-6xl flex-1 px-4 pt-6 pb-28 md:px-8 md:pt-8 md:pb-10">
             {children}
           </main>
         </div>

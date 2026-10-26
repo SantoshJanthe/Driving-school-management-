@@ -13,12 +13,12 @@ export function Sidebar({ schoolName }: { schoolName: string }) {
   const items = visibleNavItems(profile);
 
   return (
-    <aside className="sticky top-16 hidden h-[calc(100dvh-4rem)] w-60 shrink-0 flex-col border-r border-[#d0d7de] bg-[#f6f8fa] text-[#1f2328] lg:flex">
-      <div className="px-4 pt-4 pb-2 text-xs font-semibold tracking-wide text-[#59636e] uppercase">
+    <aside className="sticky top-16 hidden h-[calc(100dvh-4rem)] w-64 shrink-0 flex-col border-r border-[rgba(26,25,22,0.08)] bg-[#fffcf7]/55 px-3 py-6 backdrop-blur-md lg:flex">
+      <div className="px-3 pb-4 text-xs tracking-[0.14em] text-[#6b6560] uppercase">
         {schoolName}
       </div>
-      <nav aria-label="Main" className="flex-1 overflow-y-auto px-3 pb-3">
-        <ul className="grid gap-0.5">
+      <nav aria-label="Main" className="flex-1 overflow-y-auto">
+        <ul className="grid gap-1">
           {items.map((item) => {
             const active = isActivePath(pathname, item.href);
             return (
@@ -27,13 +27,13 @@ export function Sidebar({ schoolName }: { schoolName: string }) {
                   href={item.href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "flex h-8 items-center gap-2 rounded-md px-2 text-sm",
+                    "flex h-11 items-center gap-3 rounded-xl px-3 text-sm transition-colors",
                     active
-                      ? "bg-white font-semibold text-[#1f2328] shadow-[inset_0_0_0_1px_#d0d7de]"
-                      : "text-[#1f2328] hover:bg-[#eaeef2]",
+                      ? "bg-[#1a1916] font-medium text-[#f7f4ee]"
+                      : "text-[#1a1916] hover:bg-black/5",
                   )}
                 >
-                  <item.icon className="size-4 shrink-0 text-[#59636e]" aria-hidden />
+                  <item.icon className="size-4 shrink-0" aria-hidden />
                   {item.label}
                 </Link>
               </li>
@@ -41,8 +41,8 @@ export function Sidebar({ schoolName }: { schoolName: string }) {
           })}
         </ul>
       </nav>
-      <div className="border-t border-[#d0d7de] px-4 py-3 text-xs text-[#59636e]">
-        <span className="font-medium text-[#1f2328]">{profile.full_name}</span>
+      <div className="mt-4 border-t border-[rgba(26,25,22,0.08)] px-3 pt-4 text-xs text-[#6b6560]">
+        <span className="font-medium text-[#1a1916]">{profile.full_name}</span>
         <br />
         {profile.role === "admin" ? "Administrator" : "Staff"}
       </div>

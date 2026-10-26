@@ -35,8 +35,8 @@ export function ApplicantTabs({
                 className={cn(
                   "inline-flex h-11 items-center border-b-2 px-3 text-sm font-medium",
                   active
-                    ? "border-[#fd8c73] font-semibold text-[#1f2328]"
-                    : "border-transparent text-[#59636e] hover:text-[#1f2328]",
+                    ? "border-[#1a1916] font-medium text-[#1a1916]"
+                    : "border-transparent text-[#6b6560] hover:text-[#1a1916]",
                 )}
               >
                 {tab.label}
