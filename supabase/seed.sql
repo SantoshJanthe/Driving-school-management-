@@ -15,7 +15,7 @@ values (
   '12, MG Road, Pune, Maharashtra 411001',
   '9800000000',
   'office@sample-dsm.local',
-  '{"receipt_prefix": "R-2026-", "default_sessions": 12}'::jsonb
+  '{"receipt_prefix": "R-2026-", "default_sessions": 12, "packages": [{"code": "lmv", "name": "Light motor vehicle", "fee": 8000, "sessions": 15, "summary": "Car lessons covering the learner stage and the driving test."}, {"code": "mcwg", "name": "Motorcycle with gear", "fee": 4500, "sessions": 10, "summary": "Two-wheeler lessons for riders who need a geared motorcycle licence."}, {"code": "lmv-mcwg", "name": "Car and motorcycle", "fee": 11000, "sessions": 20, "summary": "Combined car and geared motorcycle training."}]}'::jsonb
 )
 on conflict (id) do nothing;
 

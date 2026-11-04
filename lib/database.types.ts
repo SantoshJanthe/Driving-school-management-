@@ -455,6 +455,20 @@ export type Database = {
         Args: { q: string; result_limit?: number };
         Returns: Database["public"]["Tables"]["applicants"]["Row"][];
       };
+      public_school: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
+      submit_enquiry: {
+        Args: {
+          p_full_name: string;
+          p_phone: string;
+          p_email?: string | null;
+          p_package_code: string;
+          p_message?: string | null;
+        };
+        Returns: string;
+      };
     };
     Enums: {
       user_role: "admin" | "staff";

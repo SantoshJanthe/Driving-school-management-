@@ -5,6 +5,7 @@ import { SessionList } from "@/components/training/session-list";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { requirePermission } from "@/lib/auth/guards";
 import { can, isAdmin } from "@/lib/auth/permissions";
+import { getApplicant } from "@/lib/queries/applicants";
 import { listApplicantSessions, listTrainingStaff, sessionTarget } from "@/lib/queries/training";
 
 export const metadata: Metadata = { title: "Training" };
@@ -27,10 +28,11 @@ export default async function ApplicantTrainingPage({
   const { id } = await params;
   const query = await searchParams;
   const canManage = can(profile, "manage_training");
+  const applicant = await getApplicant(id);
   const [rows, staff, target] = await Promise.all([
     listApplicantSessions(id),
     listTrainingStaff(),
-    sessionTarget(profile.school_id),
+    sessionTarget(profile.school_id, applicant?.license_category),
   ]);
   const completed = rows.filter((row) => row.status === "completed").length;
   const width = Math.min(100, Math.round((completed / target) * 100));

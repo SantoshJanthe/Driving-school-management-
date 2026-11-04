@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
 import { SubmitButton } from "@/components/auth/submit-button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -21,6 +21,8 @@ import {
   type TrainingStatus,
 } from "@/lib/applicants/labels";
 import type { StaffOption } from "@/lib/queries/applicants";
+import { formatINR } from "@/lib/format";
+import type { CoursePackage } from "@/lib/school/packages";
 
 export type ApplicantFormDefaults = {
   full_name: string;
@@ -92,19 +94,48 @@ function Field({
 
 const initialState: ApplicantFormState = {};
 
+function initialCourse(packages: CoursePackage[], defaults: ApplicantFormDefaults) {
+  const matched = packages.find((item) => item.name === defaults.license_category);
+  if (matched) {
+    return {
+      code: matched.code,
+      category: defaults.license_category,
+      fee: defaults.total_fee || String(matched.fee),
+    };
+  }
+  if (!defaults.license_category && !defaults.total_fee && packages[0]) {
+    return { code: packages[0].code, category: packages[0].name, fee: String(packages[0].fee) };
+  }
+  return { code: "custom", category: defaults.license_category, fee: defaults.total_fee };
+}
+
 export function ApplicantForm({
   applicantId,
   defaults,
   staff,
+  packages = [],
   cancelHref,
 }: {
   applicantId?: string;
   defaults: ApplicantFormDefaults;
   staff: StaffOption[];
+  packages?: CoursePackage[];
   cancelHref: string;
 }) {
   const [state, formAction] = useActionState(saveApplicant, initialState);
   const errors = state.fieldErrors ?? {};
+  const starting = initialCourse(packages, defaults);
+  const [packageCode, setPackageCode] = useState(starting.code);
+  const [category, setCategory] = useState(starting.category);
+  const [fee, setFee] = useState(starting.fee);
+
+  function choosePackage(code: string) {
+    setPackageCode(code);
+    const item = packages.find((row) => row.code === code);
+    if (!item) return;
+    setCategory(item.name);
+    setFee(String(item.fee));
+  }
 
   return (
     <form action={formAction} className="grid gap-8" noValidate>
@@ -264,6 +295,25 @@ export function ApplicantForm({
             />
           </Field>
           <Field
+            label="Course"
+            htmlFor="package_code"
+            hint="Choosing a course fills the category and fee."
+          >
+            <select
+              id="package_code"
+              value={packageCode}
+              onChange={(event) => choosePackage(event.target.value)}
+              className={controlClass}
+            >
+              {packages.map((item) => (
+                <option key={item.code} value={item.code}>
+                  {item.name} · {formatINR(item.fee)}
+                </option>
+              ))}
+              <option value="custom">Custom fee</option>
+            </select>
+          </Field>
+          <Field
             label="Licence category"
             htmlFor="license_category"
             error={errors.license_category}
@@ -272,7 +322,11 @@ export function ApplicantForm({
               id="license_category"
               name="license_category"
               placeholder="LMV, MCWG"
-              defaultValue={defaults.license_category}
+              value={category}
+              onChange={(event) => {
+                setCategory(event.target.value);
+                setPackageCode("custom");
+              }}
               className="h-11 text-base md:text-sm"
             />
           </Field>
@@ -314,7 +368,11 @@ export function ApplicantForm({
               name="total_fee"
               inputMode="decimal"
               placeholder="5000"
-              defaultValue={defaults.total_fee}
+              value={fee}
+              onChange={(event) => {
+                setFee(event.target.value);
+                setPackageCode("custom");
+              }}
               className="h-11 text-base md:text-sm"
             />
           </Field>

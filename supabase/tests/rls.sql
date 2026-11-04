@@ -9,6 +9,7 @@
 --   createdb dsm_test
 --   psql -d dsm_test -f supabase/tests/helpers/supabase-stub.sql
 --   psql -d dsm_test -v ON_ERROR_STOP=1 -f supabase/migrations/0001_init.sql
+--   psql -d dsm_test -v ON_ERROR_STOP=1 -f supabase/migrations/0002_public_enquiry.sql
 --   psql -d dsm_test -v ON_ERROR_STOP=1 -f supabase/tests/rls.sql
 --
 -- Everything runs inside one transaction that is rolled back, so the database
@@ -185,8 +186,51 @@ select pg_temp.check('applicant deleted', (select count(*) = 1 from public.appli
 select pg_temp.check('deleted log present', (select count(*) = 1 from public.activity_logs where action = 'deleted' and entity_type = 'applicants'));
 select pg_temp.check('history retained after delete', (select count(*) >= 5 from public.activity_logs where applicant_id is null and entity_id = '20000000-0000-0000-0000-000000000001' or applicant_id is null));
 
--- ---------------- anon ----------------
+-- ---------------- public website enquiry (0002) ----------------
 reset role;
+update public.schools
+set settings = coalesce(settings, '{}'::jsonb) || jsonb_build_object(
+  'packages', jsonb_build_array(
+    jsonb_build_object('code', 'lmv', 'name', 'Light motor vehicle', 'fee', 8000, 'sessions', 15, 'summary', 'Car')
+  )
+)
+where id = (select id from public.schools where is_active order by created_at, id limit 1);
+
+set role authenticated;
+select pg_temp.login('10000000-0000-0000-0000-000000000002');
+do $$ begin
+  update public.schools set name = 'Hacked' where id = '00000000-0000-0000-0000-00000000000a';
+  if found then raise exception 'FAIL staff updated school'; end if;
+  raise notice 'PASS staff cannot update school';
+end $$;
+
+reset role;
+select set_config('request.jwt.claim.sub', '', true);
+select set_config('request.jwt.claim.role', '', true);
+select set_config('request.jwt.claims', '', true);
+select name as expected_name from public.schools where is_active order by created_at, id limit 1 \gset
+set role anon;
+select pg_temp.check('public school name', (public.public_school() ->> 'name') = :'expected_name');
+select pg_temp.check('public school hides other columns', not (public.public_school() ? 'id'));
+do $$ begin
+  perform public.submit_enquiry('Website Learner', '9988776655', '', 'missing', 'hello');
+  raise exception 'FAIL unknown course accepted';
+exception when invalid_parameter_value then raise notice 'PASS unknown course rejected'; end $$;
+do $$ begin
+  perform public.submit_enquiry('Website Learner', '+91 99887 76655', '', 'lmv', 'Evenings please');
+  raise notice 'PASS enquiry accepted';
+end $$;
+reset role;
+select pg_temp.check('enquiry stored as applicant',
+  (select application_status = 'enquiry'
+      and license_category = 'Light motor vehicle'
+      and total_fee = 8000
+      and email is null
+      and created_by is null
+      and notes = 'Evenings please'
+   from public.applicants where phone = '9988776655'));
+
+-- ---------------- anon ----------------
 set role anon;
 do $$ begin
   perform count(*) from public.applicants;

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { DashboardToasts } from "@/components/dashboard/dashboard-toasts";
+import { OpenEnquiries } from "@/components/dashboard/open-enquiries";
 import { QuickActions } from "@/components/dashboard/quick-actions";
 import { RecentActivityList } from "@/components/dashboard/recent-activity";
 import { SummaryCards } from "@/components/dashboard/summary-cards";
@@ -10,6 +11,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { requireProfile } from "@/lib/auth/guards";
 import { can } from "@/lib/auth/permissions";
 import { getDashboardSummary, getRecentActivity, getTodaySessions } from "@/lib/queries/dashboard";
+import { getOpenEnquiries } from "@/lib/queries/enquiries";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -30,10 +32,11 @@ export default async function DashboardPage() {
   const profile = await requireProfile();
   const canViewApplicants = can(profile, "view_applicants");
 
-  const [summary, sessions, activity] = await Promise.all([
+  const [summary, sessions, activity, enquiries] = await Promise.all([
     getDashboardSummary(),
     canViewApplicants ? getTodaySessions() : Promise.resolve([]),
     canViewApplicants ? getRecentActivity() : Promise.resolve([]),
+    canViewApplicants ? getOpenEnquiries() : Promise.resolve({ total: 0, rows: [] }),
   ]);
 
   return (
@@ -49,6 +52,8 @@ export default async function DashboardPage() {
       />
 
       <SummaryCards summary={summary} />
+
+      {canViewApplicants ? <OpenEnquiries total={enquiries.total} rows={enquiries.rows} /> : null}
 
       {canViewApplicants ? (
         <div className="grid gap-4 lg:grid-cols-2">

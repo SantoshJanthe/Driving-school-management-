@@ -4,13 +4,19 @@ import { notFound } from "next/navigation";
 import { ApplicantForm, type ApplicantFormDefaults } from "@/components/applicants/applicant-form";
 import { requirePermission } from "@/lib/auth/guards";
 import { getApplicant, listStaffOptions } from "@/lib/queries/applicants";
+import { DEFAULT_PACKAGES } from "@/lib/school/packages";
+import { getOwnSchool } from "@/lib/queries/school";
 
 export const metadata: Metadata = { title: "Edit applicant" };
 
 export default async function EditApplicantPage({ params }: { params: Promise<{ id: string }> }) {
   await requirePermission("edit_applicant");
   const { id } = await params;
-  const [applicant, staff] = await Promise.all([getApplicant(id), listStaffOptions()]);
+  const [applicant, staff, school] = await Promise.all([
+    getApplicant(id),
+    listStaffOptions(),
+    getOwnSchool(),
+  ]);
   if (!applicant) notFound();
 
   const defaults: ApplicantFormDefaults = {
@@ -39,6 +45,7 @@ export default async function EditApplicantPage({ params }: { params: Promise<{ 
       applicantId={applicant.id}
       defaults={defaults}
       staff={staff}
+      packages={school?.packages ?? DEFAULT_PACKAGES}
       cancelHref={`/applicants/${applicant.id}`}
     />
   );

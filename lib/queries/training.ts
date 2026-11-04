@@ -1,3 +1,4 @@
+import { sessionTargetFor } from "@/lib/school/packages";
 import { createClient } from "@/lib/supabase/server";
 import type { SessionStatus } from "@/lib/training/constants";
 
@@ -106,17 +107,15 @@ export async function listTrainingApplicants(): Promise<ApplicantOption[]> {
   return data ?? [];
 }
 
-export async function sessionTarget(schoolId: string): Promise<number> {
+export async function sessionTarget(
+  schoolId: string,
+  licenseCategory?: string | null,
+): Promise<number> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("schools")
     .select("settings")
     .eq("id", schoolId)
     .maybeSingle();
-  const settings = data?.settings;
-  const raw =
-    settings && typeof settings === "object" && !Array.isArray(settings)
-      ? Number((settings as { default_sessions?: unknown }).default_sessions)
-      : NaN;
-  return Number.isFinite(raw) && raw > 0 ? raw : 12;
+  return sessionTargetFor(data?.settings, licenseCategory);
 }
