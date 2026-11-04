@@ -1,3 +1,6 @@
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+
 import { AppShell } from "@/components/layout/app-shell";
 import { PermissionProvider } from "@/components/providers/permission-provider";
 import { requireProfile } from "@/lib/auth/guards";
@@ -11,6 +14,14 @@ import { createClient } from "@/lib/supabase/server";
  */
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const profile = await requireProfile();
+  const pathname = (await headers()).get("x-pathname") ?? "";
+  if (
+    profile.role === "student" &&
+    pathname !== "/dashboard" &&
+    !pathname.startsWith("/api/documents")
+  ) {
+    redirect("/dashboard");
+  }
 
   const supabase = await createClient();
   const { data: school } = await supabase

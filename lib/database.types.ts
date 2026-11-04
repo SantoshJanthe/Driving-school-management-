@@ -512,6 +512,24 @@ export type Database = {
         };
         Returns: string;
       };
+      create_school: {
+        Args: {
+          p_name: string;
+          p_address?: string | null;
+          p_phone?: string | null;
+          p_email?: string | null;
+          p_settings?: Json;
+        };
+        Returns: string;
+      };
+      school_has_admin: {
+        Args: { p_school: string; p_user: string };
+        Returns: boolean;
+      };
+      delete_empty_school: {
+        Args: { p_school: string };
+        Returns: undefined;
+      };
     };
     Enums: {
       user_role: "admin" | "staff" | "student";

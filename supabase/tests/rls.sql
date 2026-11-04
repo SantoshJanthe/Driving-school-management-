@@ -12,6 +12,7 @@
 --   psql -d dsm_test -v ON_ERROR_STOP=1 -f supabase/migrations/0002_public_enquiry.sql
 --   psql -d dsm_test -v ON_ERROR_STOP=1 -f supabase/migrations/0003_student_role.sql
 --   psql -d dsm_test -v ON_ERROR_STOP=1 -f supabase/migrations/0004_student_access.sql
+--   psql -d dsm_test -v ON_ERROR_STOP=1 -f supabase/migrations/0005_school_setup.sql
 --   psql -d dsm_test -v ON_ERROR_STOP=1 -f supabase/tests/rls.sql
 --
 -- Everything runs inside one transaction that is rolled back, so the database
@@ -288,6 +289,14 @@ end $$;
 select pg_temp.login('10000000-0000-0000-0000-000000000001');
 select pg_temp.check('admin still sees the student applicant',
   (select count(*) = 1 from public.applicants where id = '20000000-0000-0000-0000-000000000021'));
+select public.create_school('Other Driving School', '1 Test Road', '9800011111', 'other@example.com', '{}'::jsonb);
+select pg_temp.check('creating admin cannot see the new school',
+  (select count(*) = 0 from public.schools where name = 'Other Driving School'));
+select pg_temp.login('10000000-0000-0000-0000-000000000002');
+do $$ begin
+  perform public.create_school('Staff School', null, null, null, '{}'::jsonb);
+  raise exception 'FAIL staff created a school';
+exception when insufficient_privilege then raise notice 'PASS staff cannot create a school'; end $$;
 
 -- ---------------- anon ----------------
 reset role;

@@ -1,4 +1,5 @@
 import {
+  Building2,
   CarFront,
   FileText,
   IndianRupee,
@@ -31,12 +32,16 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/staff", label: "Staff", icon: UserCog, adminOnly: true },
   { href: "/activity-logs", label: "Logs", icon: ScrollText, adminOnly: true },
   { href: "/settings", label: "Settings", icon: Settings },
+  { href: "/schools/new", label: "New school", icon: Building2, adminOnly: true },
 ];
 
 /** Items shown in the mobile bottom bar before the "More" sheet, in priority order. */
 export const MOBILE_PRIMARY_HREFS = ["/dashboard", "/applicants", "/training", "/payments"];
 
 export function visibleNavItems(subject: PermissionSubject): NavItem[] {
+  if (subject.role === "student") {
+    return [{ href: "/dashboard", label: "Home", icon: LayoutDashboard }];
+  }
   return NAV_ITEMS.filter((item) => {
     if (item.adminOnly) return isAdmin(subject);
     if (item.permission) return can(subject, item.permission);

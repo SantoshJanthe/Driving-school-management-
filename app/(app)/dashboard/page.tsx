@@ -8,10 +8,12 @@ import { RecentActivityList } from "@/components/dashboard/recent-activity";
 import { SummaryCards } from "@/components/dashboard/summary-cards";
 import { TodaySessions } from "@/components/dashboard/today-sessions";
 import { PageHeader } from "@/components/layout/page-header";
+import { StudentHomeView } from "@/components/student/student-home";
 import { requireProfile } from "@/lib/auth/guards";
 import { can } from "@/lib/auth/permissions";
 import { getDashboardSummary, getRecentActivity, getTodaySessions } from "@/lib/queries/dashboard";
 import { getOpenEnquiries } from "@/lib/queries/enquiries";
+import { getStudentHome } from "@/lib/queries/student-home";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -30,6 +32,11 @@ function greeting() {
 
 export default async function DashboardPage() {
   const profile = await requireProfile();
+  if (profile.role === "student") {
+    const home = await getStudentHome();
+    return <StudentHomeView home={home} />;
+  }
+
   const canViewApplicants = can(profile, "view_applicants");
 
   const [summary, sessions, activity, enquiries] = await Promise.all([

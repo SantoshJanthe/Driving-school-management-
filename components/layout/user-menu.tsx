@@ -59,13 +59,17 @@ export function UserMenu({ onDark = false }: { onDark?: boolean }) {
             </Badge>
           </div>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link href="/settings">
-            <Settings aria-hidden />
-            Settings
-          </Link>
-        </DropdownMenuItem>
+        {profile.role === "student" ? null : (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link href="/settings">
+                <Settings aria-hidden />
+                Settings
+              </Link>
+            </DropdownMenuItem>
+          </>
+        )}
         <DropdownMenuSeparator />
         <form action={logout}>
           <DropdownMenuItem asChild variant="destructive">

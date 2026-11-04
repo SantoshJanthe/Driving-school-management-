@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { pageTitleFor } from "@/components/layout/nav-items";
 import { SchoolLogo } from "@/components/layout/school-logo";
 import { UserMenu } from "@/components/layout/user-menu";
-import { useCan } from "@/components/providers/permission-provider";
+import { useCan, useProfile } from "@/components/providers/permission-provider";
 
 export function GlobalHeader({ schoolName }: { schoolName: string }) {
   const canSearch = useCan("view_applicants");
@@ -56,7 +56,9 @@ export function GlobalHeader({ schoolName }: { schoolName: string }) {
 /** Page name under the global header, the way a GitHub repo names the current view. */
 export function PageTitleBar() {
   const pathname = usePathname();
-  const title = pageTitleFor(pathname);
+  const profile = useProfile();
+  const title =
+    profile.role === "student" && pathname === "/dashboard" ? "Home" : pageTitleFor(pathname);
   if (!title) return null;
 
   return (

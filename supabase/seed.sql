@@ -121,3 +121,32 @@ values (
   'c0000000-0000-4000-8000-000000000003'
 )
 on conflict (profile_id) do nothing;
+
+insert into public.training_sessions (
+  id, applicant_id, session_date, start_time, end_time, vehicle_type,
+  instructor_id, status, created_by
+)
+values (
+  'd0000000-0000-4000-8000-000000000003',
+  'c0000000-0000-4000-8000-000000000003',
+  current_date,
+  '07:00',
+  '08:00',
+  'LMV',
+  'b0000000-0000-4000-8000-000000000002',
+  'scheduled',
+  'b0000000-0000-4000-8000-000000000001'
+)
+on conflict (id) do nothing;
+
+insert into public.payments (id, applicant_id, amount, payment_date, payment_mode, receipt_number, recorded_by)
+values (
+  'e0000000-0000-4000-8000-000000000003',
+  'c0000000-0000-4000-8000-000000000003',
+  2000,
+  current_date,
+  'upi',
+  'R-DEMO-1',
+  'b0000000-0000-4000-8000-000000000001'
+)
+on conflict (id) do nothing;
