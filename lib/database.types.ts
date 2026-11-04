@@ -96,6 +96,49 @@ export type Database = {
           },
         ];
       };
+      student_accounts: {
+        Row: {
+          profile_id: string;
+          school_id: string;
+          applicant_id: string;
+          created_at: string;
+        };
+        Insert: {
+          profile_id: string;
+          school_id: string;
+          applicant_id: string;
+          created_at?: string;
+        };
+        Update: {
+          profile_id?: string;
+          school_id?: string;
+          applicant_id?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "student_accounts_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: true;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "student_accounts_school_id_fkey";
+            columns: ["school_id"];
+            isOneToOne: false;
+            referencedRelation: "schools";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "student_accounts_applicant_id_fkey";
+            columns: ["applicant_id"];
+            isOneToOne: true;
+            referencedRelation: "applicants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       applicants: {
         Row: {
           id: string;
@@ -471,7 +514,7 @@ export type Database = {
       };
     };
     Enums: {
-      user_role: "admin" | "staff";
+      user_role: "admin" | "staff" | "student";
       gender: "male" | "female" | "other";
       application_status:
         | "enquiry"

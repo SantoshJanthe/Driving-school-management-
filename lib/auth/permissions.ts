@@ -53,6 +53,7 @@ export type PermissionSubject = { role: Role; permissions: Permissions; is_activ
 
 export function can(subject: PermissionSubject | null | undefined, key: Permission): boolean {
   if (!subject || !subject.is_active) return false;
+  if (subject.role === "student") return false;
   if (subject.role === "admin") return true;
   return subject.permissions[key] === true;
 }

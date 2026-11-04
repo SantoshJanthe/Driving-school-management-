@@ -10,6 +10,8 @@
 --   psql -d dsm_test -f supabase/tests/helpers/supabase-stub.sql
 --   psql -d dsm_test -v ON_ERROR_STOP=1 -f supabase/migrations/0001_init.sql
 --   psql -d dsm_test -v ON_ERROR_STOP=1 -f supabase/migrations/0002_public_enquiry.sql
+--   psql -d dsm_test -v ON_ERROR_STOP=1 -f supabase/migrations/0003_student_role.sql
+--   psql -d dsm_test -v ON_ERROR_STOP=1 -f supabase/migrations/0004_student_access.sql
 --   psql -d dsm_test -v ON_ERROR_STOP=1 -f supabase/tests/rls.sql
 --
 -- Everything runs inside one transaction that is rolled back, so the database
@@ -230,7 +232,65 @@ select pg_temp.check('enquiry stored as applicant',
       and notes = 'Evenings please'
    from public.applicants where phone = '9988776655'));
 
+-- ---------------- student ----------------
+reset role;
+insert into public.applicants (id, school_id, full_name, phone, total_fee, license_category)
+values (
+  '20000000-0000-0000-0000-000000000021',
+  '00000000-0000-0000-0000-00000000000a',
+  'Student A',
+  '9000000001',
+  8000,
+  'Light motor vehicle'
+);
+insert into auth.users (id, email, raw_user_meta_data) values (
+  '10000000-0000-0000-0000-000000000021',
+  'student-a@x.io',
+  '{"school_id":"00000000-0000-0000-0000-00000000000a","full_name":"Student A","role":"student"}'
+);
+insert into public.student_accounts (profile_id, school_id, applicant_id)
+values (
+  '10000000-0000-0000-0000-000000000021',
+  '00000000-0000-0000-0000-00000000000a',
+  '20000000-0000-0000-0000-000000000021'
+);
+set role authenticated;
+select pg_temp.login('10000000-0000-0000-0000-000000000001');
+do $$ begin
+  insert into public.student_accounts (profile_id, school_id, applicant_id)
+  values (
+    '10000000-0000-0000-0000-000000000002',
+    '00000000-0000-0000-0000-00000000000a',
+    '20000000-0000-0000-0000-000000000002'
+  );
+  raise exception 'FAIL staff profile linked as a student';
+exception when insufficient_privilege then raise notice 'PASS only a student login can be linked'; end $$;
+
+select pg_temp.login('10000000-0000-0000-0000-000000000021');
+select pg_temp.check('student is not admin', not app.is_admin());
+select pg_temp.check('student has no staff permission', not app.has_permission('view_applicants'));
+select pg_temp.check('student sees only own applicant',
+  (select count(*) = 1 and bool_and(full_name = 'Student A') from public.applicants));
+select pg_temp.check('student sees own school only', (select count(*) = 1 from public.schools));
+select pg_temp.check('student sees no payments yet', (select count(*) = 0 from public.payments));
+select pg_temp.check('student sees no audit log', (select count(*) = 0 from public.audit_logs));
+select pg_temp.check('student sees only own profile', (select count(*) = 1 from public.profiles));
+do $$ begin
+  insert into public.payments (applicant_id, amount, payment_mode)
+  values ('20000000-0000-0000-0000-000000000021', 10, 'cash');
+  raise exception 'FAIL student added a payment';
+exception when insufficient_privilege then raise notice 'PASS student cannot add a payment'; end $$;
+do $$ begin
+  update public.applicants set notes = 'changed' where id = '20000000-0000-0000-0000-000000000021';
+  if found then raise exception 'FAIL student edited applicant'; end if;
+  raise notice 'PASS student cannot edit applicant';
+end $$;
+select pg_temp.login('10000000-0000-0000-0000-000000000001');
+select pg_temp.check('admin still sees the student applicant',
+  (select count(*) = 1 from public.applicants where id = '20000000-0000-0000-0000-000000000021'));
+
 -- ---------------- anon ----------------
+reset role;
 set role anon;
 do $$ begin
   perform count(*) from public.applicants;

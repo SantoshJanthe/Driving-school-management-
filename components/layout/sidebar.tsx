@@ -44,7 +44,11 @@ export function Sidebar({ schoolName }: { schoolName: string }) {
       <div className="mt-4 border-t border-[rgba(26,25,22,0.08)] px-3 pt-4 text-xs text-[#6b6560]">
         <span className="font-medium text-[#1a1916]">{profile.full_name}</span>
         <br />
-        {profile.role === "admin" ? "Administrator" : "Staff"}
+        {profile.role === "admin"
+          ? "Administrator"
+          : profile.role === "student"
+            ? "Student"
+            : "Staff"}
       </div>
     </aside>
   );
