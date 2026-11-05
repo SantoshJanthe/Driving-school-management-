@@ -953,7 +953,7 @@ create policy "applicant-documents: delete" on storage.objects
 -- 14. Bootstrap (run manually after the migration)
 -- -----------------------------------------------------------------------------
 -- 1. insert into public.schools (name, contact_phone, email)
---      values ('Sample Motor Driving School', '9800000000', 'office@example.com')
+--      values ('MOTOR DRIVING SCHOOL SOFTWARE', '9800000000', 'office@example.com')
 --      returning id;
 -- 2. Dashboard > Authentication > Users > "Add user" (or auth.admin.createUser)
 --    with user_metadata:

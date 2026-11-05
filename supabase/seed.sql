@@ -12,7 +12,7 @@
 insert into public.schools (id, name, address, contact_phone, email, settings)
 values (
   'a0000000-0000-4000-8000-000000000001',
-  'Sample Motor Driving School',
+  'MOTOR DRIVING SCHOOL SOFTWARE',
   '12, MG Road, Pune, Maharashtra 411001',
   '9800000000',
   'office@sample-dsm.local',
