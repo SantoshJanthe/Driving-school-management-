@@ -20,11 +20,12 @@ function SessionItem({ session }: { session: StudentSession }) {
   return (
     <li className="rounded-xl border border-black/10 bg-white/60 px-4 py-3">
       <p className="font-medium">{sessionLine(session)}</p>
-      <p className="text-sm text-muted-foreground">
-        {session.attendance ? ATTENDANCE_LABELS[session.attendance] : "Attendance not marked"}
-        {session.vehicle_type ? ` · ${session.vehicle_type}` : ""}
-        {session.instructor_name ? ` · ${session.instructor_name}` : ""}
-      </p>
+        <p className="text-sm text-muted-foreground">
+          {session.attendance ? ATTENDANCE_LABELS[session.attendance] : "Attendance not marked"}
+          {session.vehicle_type ? ` · ${session.vehicle_type}` : ""}
+          {session.instructor_name ? ` · ${session.instructor_name}` : ""}
+        </p>
+        {session.remarks ? <p className="text-sm">{session.remarks}</p> : null}
     </li>
   );
 }
@@ -71,6 +72,26 @@ export function StudentHomeView({ home }: { home: StudentHome | null }) {
             <dd>{formatPhone(home.phone)}</dd>
           </div>
           <div>
+            <dt className="text-xs tracking-wide text-muted-foreground uppercase">Email</dt>
+            <dd>{home.email ?? "—"}</dd>
+          </div>
+          <div>
+            <dt className="text-xs tracking-wide text-muted-foreground uppercase">Date of birth</dt>
+            <dd>{home.date_of_birth ? formatDate(home.date_of_birth) : "—"}</dd>
+          </div>
+          <div>
+            <dt className="text-xs tracking-wide text-muted-foreground uppercase">Gender</dt>
+            <dd>{home.gender ?? "—"}</dd>
+          </div>
+          <div className="sm:col-span-2">
+            <dt className="text-xs tracking-wide text-muted-foreground uppercase">Address</dt>
+            <dd>{home.address ?? "—"}</dd>
+          </div>
+          <div>
+            <dt className="text-xs tracking-wide text-muted-foreground uppercase">Assigned staff</dt>
+            <dd>{home.assigned_staff ?? "—"}</dd>
+          </div>
+          <div>
             <dt className="text-xs tracking-wide text-muted-foreground uppercase">Application number</dt>
             <dd>{home.application_number ?? "—"}</dd>
           </div>
@@ -105,6 +126,7 @@ export function StudentHomeView({ home }: { home: StudentHome | null }) {
                   {session.instructor_name ? ` · ${session.instructor_name}` : ""}
                   {session.attendance ? ` · ${ATTENDANCE_LABELS[session.attendance]}` : ""}
                 </p>
+                {session.remarks ? <p className="text-sm">{session.remarks}</p> : null}
               </li>
             ))}
           </ul>

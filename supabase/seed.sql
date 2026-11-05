@@ -202,8 +202,23 @@ set ll_number = 'MH12 2026001234',
     ll_issued_on = current_date - 30,
     dl_test_date = current_date + 14,
     dl_result = 'pending',
-    application_number = 'MH/2026/00421'
+    application_number = 'MH/2026/00421',
+    date_of_birth = '2004-03-12',
+    gender = 'female',
+    address = '14, FC Road',
+    city = 'Pune',
+    state = 'Maharashtra',
+    pincode = '411004',
+    assigned_staff_id = 'b0000000-0000-4000-8000-000000000002'
 where id = 'c0000000-0000-4000-8000-000000000003';
+
+update public.training_sessions
+set remarks = 'Clutch control on a slope'
+where id = 'd0000000-0000-4000-8000-000000000004';
+
+update public.training_sessions
+set remarks = 'Highway lane changes'
+where id = 'd0000000-0000-4000-8000-000000000003';
 
 insert into public.documents (
   id, school_id, applicant_id, document_type, file_name, storage_path, file_size, mime_type, uploaded_by

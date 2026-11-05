@@ -1,7 +1,9 @@
 import {
   APPLICATION_STATUS_LABELS,
+  GENDER_LABELS,
   TRAINING_STATUS_LABELS,
   type ApplicationStatus,
+  type Gender,
   type TrainingStatus,
 } from "@/lib/applicants/labels";
 import { DOCUMENT_TYPES, type DocumentType } from "@/lib/documents/constants";
@@ -18,6 +20,7 @@ export type StudentSession = {
   status: SessionStatus;
   attendance: AttendanceMark | null;
   instructor_name: string | null;
+  remarks: string | null;
 };
 
 export type StudentDocument = {
@@ -39,6 +42,11 @@ export type StudentHome = {
   applicant_id: string;
   full_name: string;
   phone: string;
+  email: string | null;
+  address: string | null;
+  date_of_birth: string | null;
+  gender: string | null;
+  assigned_staff: string | null;
   application_number: string | null;
   license_category: string | null;
   application_status: string;
@@ -75,6 +83,7 @@ function mapSession(row: {
   vehicle_type: string | null;
   status: SessionStatus;
   attendance: AttendanceMark | null;
+  remarks: string | null;
   instructor: { full_name: string } | { full_name: string }[] | null;
 }): StudentSession {
   return {
@@ -86,6 +95,7 @@ function mapSession(row: {
     status: row.status,
     attendance: row.attendance,
     instructor_name: one(row.instructor)?.full_name ?? null,
+    remarks: row.remarks,
   };
 }
 
@@ -109,14 +119,14 @@ export async function getStudentHome(): Promise<StudentHome | null> {
     supabase
       .from("applicants")
       .select(
-        "full_name, phone, application_number, license_category, application_status, training_status, total_fee, amount_paid, balance_due, ll_number, ll_issued_on, dl_test_date, dl_result",
+        "full_name, phone, email, address, city, state, pincode, date_of_birth, gender, application_number, license_category, application_status, training_status, total_fee, amount_paid, balance_due, ll_number, ll_issued_on, dl_test_date, dl_result, assigned_staff:profiles!applicants_assigned_staff_id_fkey(full_name)",
       )
       .eq("id", link.applicant_id)
       .maybeSingle(),
     supabase
       .from("training_sessions")
       .select(
-        "id, session_date, start_time, end_time, vehicle_type, status, attendance, instructor:profiles!training_sessions_instructor_id_fkey(full_name)",
+        "id, session_date, start_time, end_time, vehicle_type, status, attendance, remarks, instructor:profiles!training_sessions_instructor_id_fkey(full_name)",
       )
       .eq("applicant_id", link.applicant_id)
       .neq("status", "cancelled")
@@ -145,11 +155,23 @@ export async function getStudentHome(): Promise<StudentHome | null> {
   const uploaded = new Set((documents ?? []).map((row) => row.document_type));
   const applicationStatus = applicant.application_status as ApplicationStatus;
   const trainingStatus = applicant.training_status as TrainingStatus;
+  const gender = applicant.gender as Gender | null;
+  const address = [applicant.address, applicant.city, applicant.state, applicant.pincode]
+    .filter(Boolean)
+    .join(", ");
+  const assigned = one(
+    applicant.assigned_staff as { full_name: string } | { full_name: string }[] | null,
+  );
 
   return {
     applicant_id: link.applicant_id,
     full_name: applicant.full_name,
     phone: applicant.phone,
+    email: applicant.email,
+    address: address || null,
+    date_of_birth: applicant.date_of_birth,
+    gender: gender ? GENDER_LABELS[gender] : null,
+    assigned_staff: assigned?.full_name ?? null,
     application_number: applicant.application_number,
     license_category: applicant.license_category,
     application_status: APPLICATION_STATUS_LABELS[applicationStatus] ?? applicationStatus,
