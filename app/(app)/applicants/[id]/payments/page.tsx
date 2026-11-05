@@ -1,16 +1,27 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
 import { EditPaymentForm } from "@/components/payments/edit-payment-form";
 import { OfficePaymentForm } from "@/components/payments/office-payment-form";
+import { RazorpayPanel } from "@/components/payments/razorpay-panel";
 import { requirePermission } from "@/lib/auth/guards";
 import { can, isAdmin } from "@/lib/auth/permissions";
 import { formatDate, formatINR } from "@/lib/format";
 import { getApplicant } from "@/lib/queries/applicants";
+import { env } from "@/lib/env";
+import { razorpayStatus } from "@/lib/razorpay/server";
 import { createClient } from "@/lib/supabase/server";
 import { kolkataDate } from "@/lib/training/constants";
 
 export const metadata: Metadata = { title: "Payments" };
+
+async function origin() {
+  const headerStore = await headers();
+  const host = headerStore.get("x-forwarded-host") ?? headerStore.get("host");
+  const proto = headerStore.get("x-forwarded-proto") ?? (host?.includes("localhost") ? "http" : "https");
+  return host ? `${proto}://${host}` : env.appUrl;
+}
 
 function num(value: unknown) {
   const n = typeof value === "string" ? Number(value) : typeof value === "number" ? value : 0;
@@ -51,6 +62,21 @@ export default async function ApplicantPaymentsPage({
           </div>
         ))}
       </dl>
+      <RazorpayPanel
+        status={razorpayStatus()}
+        applicants={[
+          {
+            id: applicant.id,
+            full_name: applicant.full_name,
+            phone: applicant.phone,
+            application_number: applicant.application_number,
+            balance_due: applicant.balance_due,
+          },
+        ]}
+        selectedId={applicant.id}
+        webhookUrl={`${await origin()}/api/razorpay/webhook`}
+        canCreate={can(profile, "add_payment")}
+      />
       {can(profile, "add_payment") ? (
         <OfficePaymentForm
           applicants={[

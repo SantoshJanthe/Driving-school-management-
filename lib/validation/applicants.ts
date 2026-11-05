@@ -110,6 +110,13 @@ export const applicantSchema = z.object({
   pincode,
   aadhaar_last4: aadhaarLast4,
   application_number: optionalText(40),
+  sarathi_reference: optionalText(40),
+  sarathi_status: optionalText(40),
+  sarathi_checked_on: z
+    .string()
+    .trim()
+    .transform((value) => (value === "" ? null : value))
+    .refine((value) => value === null || /^\d{4}-\d{2}-\d{2}$/.test(value), "Enter the date the school checked it"),
   license_category: optionalText(40),
   application_status: z.enum(APPLICATION_STATUSES),
   training_status: z.enum(TRAINING_STATUSES),
@@ -154,6 +161,9 @@ export function readApplicantForm(formData: FormData) {
     pincode: formData.get("pincode"),
     aadhaar_last4: formData.get("aadhaar_last4"),
     application_number: formData.get("application_number"),
+    sarathi_reference: formData.get("sarathi_reference"),
+    sarathi_status: formData.get("sarathi_status"),
+    sarathi_checked_on: formData.get("sarathi_checked_on"),
     license_category: formData.get("license_category"),
     application_status: formData.get("application_status"),
     training_status: formData.get("training_status"),

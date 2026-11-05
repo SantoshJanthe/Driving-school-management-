@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { requirePermission } from "@/lib/auth/guards";
 import { can, isAdmin } from "@/lib/auth/permissions";
+import { listLessonLocations } from "@/lib/queries/locations";
 import { listDaySessions, listTrainingApplicants, listTrainingStaff, listVehicles } from "@/lib/queries/training";
 import { formatDate } from "@/lib/format";
 import { isIsoDate, kolkataDate, shiftDate, VEHICLE_TYPES } from "@/lib/training/constants";
@@ -48,11 +49,13 @@ export default async function TrainingPage({
   const instructor = query.instructor || undefined;
   const vehicle = query.vehicle || undefined;
   const canManage = can(profile, "manage_training");
-  const [rows, staff, applicants, vehicles] = await Promise.all([
+  const admin = isAdmin(profile);
+  const [rows, staff, applicants, vehicles, locations] = await Promise.all([
     listDaySessions({ date, instructorId: instructor, vehicle }),
     listTrainingStaff(),
     listTrainingApplicants(),
     listVehicles(),
+    admin ? listLessonLocations() : Promise.resolve([]),
   ]);
   const completed = rows.filter((row) => row.status === "completed").length;
   const absent = rows.filter((row) => row.status === "absent").length;
@@ -150,10 +153,34 @@ export default async function TrainingPage({
         rows={rows}
         returnTo={returnTo}
         canManage={canManage}
-        isAdmin={isAdmin(profile)}
+        isAdmin={admin}
         staff={staff}
         showApplicant
       />
+      {admin ? (
+        <section className="grid gap-2" aria-labelledby="locations-heading">
+          <h2 id="locations-heading" className="text-sm font-semibold tracking-wide uppercase">
+            Saved vehicle locations
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Points an instructor saved for a lesson. This is not a live map.
+          </p>
+          {locations.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No location saved yet.</p>
+          ) : (
+            <ul className="grid gap-2">
+              {locations.map((point) => (
+                <li key={point.id} className="rounded-xl border px-4 py-3 text-sm">
+                  <p className="font-medium">{point.label}</p>
+                  <p className="text-muted-foreground">
+                    {point.latitude.toFixed(5)}, {point.longitude.toFixed(5)}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      ) : null}
       <p className="text-sm text-muted-foreground">
         {rows.length} {rows.length === 1 ? "session" : "sessions"} · {completed} completed ·{" "}
         {absent} absent

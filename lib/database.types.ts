@@ -166,6 +166,9 @@ export type Database = {
           balance_due: number;
           assigned_staff_id: string | null;
           notes: string | null;
+          sarathi_reference: string | null;
+          sarathi_status: string | null;
+          sarathi_checked_on: string | null;
           ll_number: string | null;
           ll_issued_on: string | null;
           dl_test_date: string | null;
@@ -197,6 +200,9 @@ export type Database = {
           balance_due?: number;
           assigned_staff_id?: string | null;
           notes?: string | null;
+          sarathi_reference?: string | null;
+          sarathi_status?: string | null;
+          sarathi_checked_on?: string | null;
           ll_number?: string | null;
           ll_issued_on?: string | null;
           dl_test_date?: string | null;
@@ -228,6 +234,9 @@ export type Database = {
           balance_due?: number;
           assigned_staff_id?: string | null;
           notes?: string | null;
+          sarathi_reference?: string | null;
+          sarathi_status?: string | null;
+          sarathi_checked_on?: string | null;
           ll_number?: string | null;
           ll_issued_on?: string | null;
           dl_test_date?: string | null;
@@ -554,6 +563,60 @@ export type Database = {
           locked_until?: string | null;
           updated_at?: string;
         };
+        Relationships: [];
+      };
+      reminders: {
+        Row: {
+          id: string;
+          school_id: string;
+          applicant_id: string;
+          channel: string;
+          kind: string;
+          body: string;
+          status: string;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          school_id: string;
+          applicant_id: string;
+          channel: string;
+          kind: string;
+          body: string;
+          status?: string;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          status?: string;
+        };
+        Relationships: [];
+      };
+      lesson_locations: {
+        Row: {
+          id: string;
+          school_id: string;
+          session_id: string;
+          vehicle_id: string | null;
+          label: string;
+          latitude: number;
+          longitude: number;
+          recorded_by: string | null;
+          recorded_at: string;
+        };
+        Insert: {
+          id?: string;
+          school_id: string;
+          session_id: string;
+          vehicle_id?: string | null;
+          label: string;
+          latitude: number;
+          longitude: number;
+          recorded_by?: string | null;
+          recorded_at?: string;
+        };
+        Update: Record<string, never>;
         Relationships: [];
       };
     };

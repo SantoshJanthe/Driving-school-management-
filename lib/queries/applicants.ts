@@ -36,6 +36,9 @@ export type ApplicantDetail = ApplicantListItem & {
   pincode: string | null;
   aadhaar_last4: string | null;
   license_category: string | null;
+  sarathi_reference: string | null;
+  sarathi_status: string | null;
+  sarathi_checked_on: string | null;
   notes: string | null;
   assigned_staff_id: string | null;
   assigned_staff_name: string | null;
@@ -157,7 +160,8 @@ export const getApplicant = cache(async (id: string): Promise<ApplicantDetail | 
     .from("applicants")
     .select(
       `id, full_name, application_number, phone, alternate_phone, email, date_of_birth, gender,
-       address, city, state, pincode, aadhaar_last4, license_category, application_status,
+       address, city, state, pincode, aadhaar_last4, license_category, sarathi_reference,
+       sarathi_status, sarathi_checked_on, application_status,
        training_status, total_fee, amount_paid, balance_due, notes, assigned_staff_id,
        created_at, updated_at,
        assigned:profiles!applicants_assigned_staff_id_fkey(full_name),
@@ -182,6 +186,9 @@ export const getApplicant = cache(async (id: string): Promise<ApplicantDetail | 
     pincode: data.pincode,
     aadhaar_last4: data.aadhaar_last4,
     license_category: data.license_category,
+    sarathi_reference: data.sarathi_reference,
+    sarathi_status: data.sarathi_status,
+    sarathi_checked_on: data.sarathi_checked_on,
     notes: data.notes,
     assigned_staff_id: data.assigned_staff_id,
     assigned_staff_name: assigned?.full_name ?? null,

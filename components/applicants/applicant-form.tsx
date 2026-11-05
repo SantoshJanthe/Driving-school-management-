@@ -37,6 +37,9 @@ export type ApplicantFormDefaults = {
   pincode: string;
   aadhaar_last4: string;
   application_number: string;
+  sarathi_reference: string;
+  sarathi_status: string;
+  sarathi_checked_on: string;
   license_category: string;
   application_status: ApplicationStatus;
   training_status: TrainingStatus;
@@ -58,6 +61,9 @@ export const EMPTY_APPLICANT_FORM: ApplicantFormDefaults = {
   pincode: "",
   aadhaar_last4: "",
   application_number: "",
+  sarathi_reference: "",
+  sarathi_status: "",
+  sarathi_checked_on: "",
   license_category: "",
   application_status: "enquiry",
   training_status: "not_started",
@@ -291,6 +297,40 @@ export function ApplicantForm({
               name="application_number"
               placeholder="MH/2026/12345"
               defaultValue={defaults.application_number}
+              className="h-11 text-base md:text-sm"
+            />
+          </Field>
+          <Field
+            label="SARATHI reference"
+            htmlFor="sarathi_reference"
+            error={errors.sarathi_reference}
+            hint="Typed by the school. This form does not contact the SARATHI portal."
+          >
+            <Input
+              id="sarathi_reference"
+              name="sarathi_reference"
+              defaultValue={defaults.sarathi_reference}
+              className="h-11 text-base md:text-sm"
+            />
+          </Field>
+          <Field label="SARATHI status" htmlFor="sarathi_status" error={errors.sarathi_status}>
+            <Input
+              id="sarathi_status"
+              name="sarathi_status"
+              defaultValue={defaults.sarathi_status}
+              className="h-11 text-base md:text-sm"
+            />
+          </Field>
+          <Field
+            label="SARATHI checked on"
+            htmlFor="sarathi_checked_on"
+            error={errors.sarathi_checked_on}
+          >
+            <Input
+              id="sarathi_checked_on"
+              name="sarathi_checked_on"
+              type="date"
+              defaultValue={defaults.sarathi_checked_on}
               className="h-11 text-base md:text-sm"
             />
           </Field>
