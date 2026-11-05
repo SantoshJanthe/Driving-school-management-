@@ -100,6 +100,9 @@ export async function saveSession(
     if (/already has a lesson/i.test(error.message)) {
       return { error: "That vehicle already has a lesson at this time." };
     }
+    if (/cannot change which learner/i.test(error.message)) {
+      return { error: "An instructor cannot move a lesson to another learner." };
+    }
     return { error: permissionMessage(error) };
   }
 
