@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
+import { EditPaymentForm } from "@/components/payments/edit-payment-form";
 import { OfficePaymentForm } from "@/components/payments/office-payment-form";
 import { requirePermission } from "@/lib/auth/guards";
-import { can } from "@/lib/auth/permissions";
+import { can, isAdmin } from "@/lib/auth/permissions";
 import { formatDate, formatINR } from "@/lib/format";
 import { getApplicant } from "@/lib/queries/applicants";
 import { createClient } from "@/lib/supabase/server";
@@ -80,6 +81,16 @@ export default async function ApplicantPaymentsPage({
                   {row.receipt_number ? `Receipt ${row.receipt_number}` : "No receipt number"}
                   {row.remarks ? ` · ${row.remarks}` : ""}
                 </p>
+                {isAdmin(profile) ? (
+                  <EditPaymentForm
+                    id={row.id}
+                    amount={num(row.amount)}
+                    paymentDate={row.payment_date}
+                    paymentMode={row.payment_mode}
+                    receiptNumber={row.receipt_number}
+                    remarks={row.remarks}
+                  />
+                ) : null}
               </li>
             ))}
           </ul>

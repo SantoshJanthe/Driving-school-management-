@@ -1,9 +1,11 @@
 import Link from "next/link";
+import { Fragment } from "react";
 
+import { EditPaymentForm } from "@/components/payments/edit-payment-form";
 import { formatDate, formatINR } from "@/lib/format";
 import type { LedgerRow } from "@/lib/queries/payments";
 
-export function PaymentLedger({ rows }: { rows: LedgerRow[] }) {
+export function PaymentLedger({ rows, canEdit = false }: { rows: LedgerRow[]; canEdit?: boolean }) {
   return (
     <section className="grid gap-3">
       <h2 className="text-lg font-semibold">Recorded payments</h2>
@@ -25,7 +27,8 @@ export function PaymentLedger({ rows }: { rows: LedgerRow[] }) {
             </thead>
             <tbody>
               {rows.map((row) => (
-                <tr key={row.id} className="border-t">
+                <Fragment key={row.id}>
+                <tr className="border-t">
                   <td className="px-4 py-3 whitespace-nowrap">{formatDate(row.payment_date)}</td>
                   <td className="px-4 py-3">
                     {row.applicant_id ? (
@@ -42,6 +45,21 @@ export function PaymentLedger({ rows }: { rows: LedgerRow[] }) {
                   </td>
                   <td className="px-4 py-3 text-right tabular-nums">{formatINR(row.amount)}</td>
                 </tr>
+                {canEdit ? (
+                  <tr key={`${row.id}-edit`} className="border-t bg-[#fffcf7]">
+                    <td colSpan={5} className="px-4 py-3">
+                      <EditPaymentForm
+                        id={row.id}
+                        amount={row.amount}
+                        paymentDate={row.payment_date}
+                        paymentMode={row.payment_mode}
+                        receiptNumber={row.receipt_number}
+                        remarks={row.remarks}
+                      />
+                    </td>
+                  </tr>
+                ) : null}
+                </Fragment>
               ))}
             </tbody>
           </table>

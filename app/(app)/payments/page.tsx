@@ -8,7 +8,7 @@ import { PaymentLedger } from "@/components/payments/payment-ledger";
 import { RazorpayPanel } from "@/components/payments/razorpay-panel";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { requireProfile } from "@/lib/auth/guards";
-import { can } from "@/lib/auth/permissions";
+import { can, isAdmin } from "@/lib/auth/permissions";
 import { env } from "@/lib/env";
 import { listPayableApplicants, listRecentPayments } from "@/lib/queries/payments";
 import { razorpayStatus } from "@/lib/razorpay/server";
@@ -65,7 +65,7 @@ export default async function PaymentsPage({
         webhookUrl={`${base}/api/razorpay/webhook`}
         canCreate={can(profile, "add_payment")}
       />
-      <PaymentLedger rows={rows} />
+      <PaymentLedger rows={rows} canEdit={isAdmin(profile)} />
     </div>
   );
 }

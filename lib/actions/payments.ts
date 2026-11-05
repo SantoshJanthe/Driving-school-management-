@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 
-import { requirePermission } from "@/lib/auth/guards";
+import { requireAdmin, requirePermission } from "@/lib/auth/guards";
 import { createRazorpayPaymentLink, razorpayStatus } from "@/lib/razorpay/server";
 import { createClient } from "@/lib/supabase/server";
 import { env } from "@/lib/env";
@@ -76,6 +76,67 @@ export async function recordOfficePayment(
   revalidatePath("/reports");
   revalidatePath(`/applicants/${applicant.id}`);
   revalidatePath(`/applicants/${applicant.id}/payments`);
+  revalidatePath("/dashboard");
+  return { ok: true };
+}
+
+export async function editOfficePayment(
+  _prev: OfficePaymentState,
+  formData: FormData,
+): Promise<OfficePaymentState> {
+  const profile = await requireAdmin();
+  const id = String(formData.get("id") ?? "");
+  const mode = String(formData.get("payment_mode") ?? "");
+  const amountRaw = String(formData.get("amount") ?? "").trim();
+  const paymentDate = String(formData.get("payment_date") ?? "").trim();
+  const receipt = String(formData.get("receipt_number") ?? "").trim();
+  const remarks = String(formData.get("remarks") ?? "").trim();
+
+  if (!id) return { error: "Choose a payment." };
+  if (!PAYMENT_MODES.includes(mode as (typeof PAYMENT_MODES)[number])) {
+    return { error: "Choose cash, UPI, bank, or card." };
+  }
+  if (!/^\d+(\.\d{1,2})?$/.test(amountRaw)) return { error: "Enter an amount of at least ₹1." };
+  const amount = Number(amountRaw);
+  if (!Number.isFinite(amount) || amount < 1 || amount > 999999.99) {
+    return { error: "Enter an amount of at least ₹1." };
+  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(paymentDate)) return { error: "Choose a payment date." };
+  if (remarks.length > 500) return { error: "Remarks must be 500 characters or fewer." };
+
+  const supabase = await createClient();
+  const { data: existing, error: readError } = await supabase
+    .from("payments")
+    .select("id, applicant_id, school_id")
+    .eq("id", id)
+    .maybeSingle();
+  if (readError || !existing || existing.school_id !== profile.school_id) {
+    return { error: "That payment is not in your school." };
+  }
+
+  const { error } = await supabase
+    .from("payments")
+    .update({
+      amount,
+      payment_date: paymentDate,
+      payment_mode: mode as (typeof PAYMENT_MODES)[number],
+      receipt_number: receipt || null,
+      remarks: remarks || null,
+    })
+    .eq("id", existing.id);
+  if (error) {
+    if (error.code === "23505") return { error: "That receipt number is already used." };
+    if (error.code === "42501" || /row-level security/i.test(error.message)) {
+      return { error: "Only an admin can edit a payment." };
+    }
+    return { error: error.message };
+  }
+
+  revalidatePath("/payments");
+  revalidatePath("/fees");
+  revalidatePath("/reports");
+  revalidatePath(`/applicants/${existing.applicant_id}`);
+  revalidatePath(`/applicants/${existing.applicant_id}/payments`);
   revalidatePath("/dashboard");
   return { ok: true };
 }
