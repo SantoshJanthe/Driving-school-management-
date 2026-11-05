@@ -47,7 +47,15 @@ export function StudentHomeView({ home }: { home: StudentHome | null }) {
 
   return (
     <div className="grid gap-6">
-      <PageHeader title={home.full_name} description="Your record with the school. You cannot change it." />
+      <PageHeader
+        title={home.full_name}
+        description="Your record with the school. You cannot change these details."
+        actions={
+          <Link href="/settings" className="text-sm underline-offset-4 hover:underline">
+            Change password
+          </Link>
+        }
+      />
 
       <section className="grid gap-3 rounded-2xl border border-black/10 bg-[#fffcf7] p-5" aria-labelledby="profile-heading">
         <h2 id="profile-heading" className="text-sm font-semibold tracking-wide uppercase">

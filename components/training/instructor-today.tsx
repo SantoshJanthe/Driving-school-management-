@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { PageHeader } from "@/components/layout/page-header";
 import { SessionList } from "@/components/training/session-list";
 import { formatDate } from "@/lib/format";
@@ -10,6 +12,11 @@ export function InstructorToday({ rows }: { rows: SessionRow[] }) {
       <PageHeader
         title="Today"
         description={`Students on your lessons for ${formatDate(kolkataDate())}. Fees and other staff stay off this page.`}
+        actions={
+          <Link href="/settings" className="text-sm underline-offset-4 hover:underline">
+            Change password
+          </Link>
+        }
       />
       <SessionList
         rows={rows}

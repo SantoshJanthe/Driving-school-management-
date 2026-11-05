@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 
+import { requireProfile } from "@/lib/auth/guards";
 import { createClient } from "@/lib/supabase/server";
 import { DEACTIVATED_MESSAGE, NO_PROFILE_MESSAGE } from "@/lib/auth/messages";
 import { env } from "@/lib/env";
@@ -67,6 +68,33 @@ export async function login(_prev: AuthFormState, formData: FormData): Promise<A
   await supabase.rpc("log_event", { p_action: "login", p_entity_type: "auth" });
 
   redirect(safeNextPath(parsed.data.next));
+}
+
+export async function changeOwnPassword(
+  _prev: AuthFormState,
+  formData: FormData,
+): Promise<AuthFormState> {
+  await requireProfile();
+  const parsed = resetPasswordSchema.safeParse({
+    password: formData.get("password"),
+    confirm: formData.get("confirm"),
+  });
+  if (!parsed.success) {
+    return { fieldErrors: fieldErrorsFrom(parsed.error.issues) };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
+  if (error) {
+    if (error.code === "same_password") {
+      return { error: "New password must be different from the current one." };
+    }
+    if (error.code === "weak_password") {
+      return { error: "Password is too weak. Use at least 10 characters with letters and digits." };
+    }
+    return { error: error.message };
+  }
+  return { success: "Password updated." };
 }
 
 export async function logout() {

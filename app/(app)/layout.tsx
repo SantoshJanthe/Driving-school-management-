@@ -19,6 +19,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (
     (profile.role === "student" || isInstructorOnly(profile)) &&
     pathname !== "/dashboard" &&
+    pathname !== "/settings" &&
     !(profile.role === "student" && pathname === "/my-receipt") &&
     !pathname.startsWith("/api/documents") &&
     !(profile.role === "student" && pathname.startsWith("/api/receipts"))

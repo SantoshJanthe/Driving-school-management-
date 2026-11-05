@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 
 import { PageHeader } from "@/components/layout/page-header";
+import { PasswordForm } from "@/components/settings/password-form";
 import { SchoolForm } from "@/components/settings/school-form";
 import { requireProfile } from "@/lib/auth/guards";
-import { isAdmin } from "@/lib/auth/permissions";
+import { isAdmin, isInstructorOnly } from "@/lib/auth/permissions";
 import { formatINR } from "@/lib/format";
 import { DEFAULT_PACKAGES } from "@/lib/school/packages";
 import { getOwnSchool } from "@/lib/queries/school";
@@ -14,15 +15,21 @@ export default async function SettingsPage() {
   const profile = await requireProfile();
   const school = await getOwnSchool();
   const admin = isAdmin(profile);
+  const limited = profile.role === "student" || isInstructorOnly(profile);
   const packages = school?.packages ?? DEFAULT_PACKAGES;
 
   return (
     <div className="grid gap-6">
       <PageHeader
         title="Settings"
-        description="Branch contact and the courses offered on the public page."
+        description={
+          limited
+            ? "Change your own password."
+            : "Branch contact, courses, and your own password."
+        }
       />
-      {school ? (
+      <PasswordForm />
+      {!limited && school ? (
         admin ? (
           <SchoolForm
             name={school.name}
