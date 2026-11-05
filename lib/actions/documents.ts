@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { isDocumentType } from "@/lib/documents/constants";
+import { pathInsideApplicant } from "@/lib/documents/paths";
 import {
   copyStoredFile,
   matchesDeclaredType,
@@ -156,6 +157,9 @@ export async function uploadStudentDocument(
 
   const documentId = crypto.randomUUID();
   const storagePath = `${applicant.school_id}/${applicant.id}/${documentId}-${safeName}`;
+  if (!pathInsideApplicant(storagePath, applicant.school_id, applicant.id)) {
+    return { error: "That file could not be stored." };
+  }
   try {
     await keepPreviousVersions(supabase, applicant.school_id, applicant.id, typeRaw);
     await storeDocumentFile(supabase, storagePath, bytes, file.type);

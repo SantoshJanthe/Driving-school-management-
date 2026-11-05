@@ -1,4 +1,5 @@
 import { openDocumentFile, sanitizeFileName } from "@/lib/documents/files";
+import { pathInsideApplicant } from "@/lib/documents/paths";
 import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -20,10 +21,13 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
 
   const { data: document } = await supabase
     .from("documents")
-    .select("id, applicant_id, file_name, mime_type, storage_path, is_archived")
+    .select("id, school_id, applicant_id, file_name, mime_type, storage_path, is_archived")
     .eq("id", id)
     .maybeSingle();
   if (!document) return new Response("Document not found", { status: 404 });
+  if (!pathInsideApplicant(document.storage_path, document.school_id, document.applicant_id)) {
+    return new Response("Document not found", { status: 404 });
+  }
 
   const opened = await openDocumentFile(supabase, document.storage_path);
   if (!opened) return new Response("File is missing", { status: 404 });
