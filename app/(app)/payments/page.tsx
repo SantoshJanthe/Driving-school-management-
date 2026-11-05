@@ -35,7 +35,7 @@ export default async function PaymentsPage({
     <div className="grid gap-6">
       <PageHeader
         title="Payments"
-        description="Collect a fee with Razorpay. The payer pays on Razorpay’s page, and the paid amount is recorded here."
+        description="Record fees already collected. Razorpay stays idle until keys are configured, and this page does not charge a card."
       />
       {params.razorpay === "returned" ? (
         <Alert>

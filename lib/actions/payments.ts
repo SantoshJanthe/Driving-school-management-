@@ -3,7 +3,7 @@
 import { headers } from "next/headers";
 
 import { requirePermission } from "@/lib/auth/guards";
-import { createRazorpayPaymentLink } from "@/lib/razorpay/server";
+import { createRazorpayPaymentLink, razorpayStatus } from "@/lib/razorpay/server";
 import { createClient } from "@/lib/supabase/server";
 import { env } from "@/lib/env";
 
@@ -36,6 +36,9 @@ export async function createPaymentLink(
   formData: FormData,
 ): Promise<PaymentLinkState> {
   const profile = await requirePermission("add_payment");
+  if (!razorpayStatus().configured) {
+    return { error: "Not connected. No charge was created." };
+  }
   const applicantId = String(formData.get("applicant_id") ?? "");
   const paise = rupeesToPaise(String(formData.get("amount") ?? ""));
   const description = String(formData.get("description") ?? "").trim() || "Driving school fee";

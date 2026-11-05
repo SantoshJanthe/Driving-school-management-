@@ -67,16 +67,13 @@ export function RazorpayPanel({
       {!status.configured ? (
         <Alert>
           <AlertDescription>
-            Add <span className="font-mono">RAZORPAY_KEY_ID</span> and{" "}
-            <span className="font-mono">RAZORPAY_KEY_SECRET</span> from the Razorpay dashboard (test
-            keys start with <span className="font-mono">rzp_test_</span>) to{" "}
-            <span className="font-mono">.env.local</span>, then restart the app. The secret stays on
-            the server. Payers finish checkout on Razorpay.
+            Not connected. No Razorpay keys are set, so this school cannot create a payment link
+            and no charge is made.
           </AlertDescription>
         </Alert>
       ) : null}
 
-      {canCreate ? (
+      {status.configured && canCreate ? (
         <form action={action} className="grid gap-4">
           {state.error ? (
             <Alert variant="destructive" role="alert">
@@ -152,11 +149,11 @@ export function RazorpayPanel({
             Create Razorpay link
           </SubmitButton>
         </form>
-      ) : (
+      ) : status.configured ? (
         <p className="text-sm text-muted-foreground">
           You can view payments. Creating a Razorpay link needs the add-payment permission.
         </p>
-      )}
+      ) : null}
     </section>
   );
 }
