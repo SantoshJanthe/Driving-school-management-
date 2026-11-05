@@ -18,7 +18,13 @@ function permissionMessage(error: { code?: string; message: string }) {
 
 function safeReturn(value: string, fallback: string) {
   if (!value.startsWith("/") || value.startsWith("//") || value.includes("://")) return fallback;
-  if (value.startsWith("/training") || value.startsWith("/applicants/")) return value.split("?")[0];
+  if (
+    value.startsWith("/training") ||
+    value.startsWith("/applicants/") ||
+    value === "/dashboard"
+  ) {
+    return value.split("?")[0];
+  }
   return fallback;
 }
 

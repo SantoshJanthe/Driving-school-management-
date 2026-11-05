@@ -11,7 +11,7 @@ import {
   Users,
 } from "lucide-react";
 
-import { can, isAdmin, type Permission, type PermissionSubject } from "@/lib/auth/permissions";
+import { can, isAdmin, isInstructorOnly, type Permission, type PermissionSubject } from "@/lib/auth/permissions";
 
 export type NavItem = {
   href: string;
@@ -42,6 +42,9 @@ export const MOBILE_PRIMARY_HREFS = ["/dashboard", "/applicants", "/training", "
 export function visibleNavItems(subject: PermissionSubject): NavItem[] {
   if (subject.role === "student") {
     return [{ href: "/dashboard", label: "Home", icon: LayoutDashboard }];
+  }
+  if (isInstructorOnly(subject)) {
+    return [{ href: "/dashboard", label: "Today", icon: LayoutDashboard }];
   }
   return NAV_ITEMS.filter((item) => {
     if (item.adminOnly) return isAdmin(subject);

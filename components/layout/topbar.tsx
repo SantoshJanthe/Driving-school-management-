@@ -58,7 +58,11 @@ export function PageTitleBar() {
   const pathname = usePathname();
   const profile = useProfile();
   const title =
-    profile.role === "student" && pathname === "/dashboard" ? "Home" : pageTitleFor(pathname);
+    profile.role === "student" && pathname === "/dashboard"
+      ? "Home"
+      : profile.is_instructor && pathname === "/dashboard"
+        ? "Today"
+        : pageTitleFor(pathname);
   if (!title) return null;
 
   return (

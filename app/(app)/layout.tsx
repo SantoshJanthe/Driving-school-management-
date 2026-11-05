@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { AppShell } from "@/components/layout/app-shell";
 import { PermissionProvider } from "@/components/providers/permission-provider";
 import { requireProfile } from "@/lib/auth/guards";
+import { isInstructorOnly } from "@/lib/auth/permissions";
 import { env } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 
@@ -16,7 +17,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const profile = await requireProfile();
   const pathname = (await headers()).get("x-pathname") ?? "";
   if (
-    profile.role === "student" &&
+    (profile.role === "student" || isInstructorOnly(profile)) &&
     pathname !== "/dashboard" &&
     !pathname.startsWith("/api/documents")
   ) {

@@ -12,6 +12,7 @@ export type Profile = {
   role: Role;
   permissions: Permissions;
   is_active: boolean;
+  is_instructor: boolean;
   last_login_at: string | null;
 };
 
@@ -42,6 +43,7 @@ export const getProfile = cache(async (): Promise<Profile | null> => {
     role: data.role,
     permissions: parsePermissions(data.permissions),
     is_active: data.is_active,
+    is_instructor: data.is_instructor,
     last_login_at: data.last_login_at,
   };
 });

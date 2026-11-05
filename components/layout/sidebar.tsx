@@ -48,7 +48,9 @@ export function Sidebar({ schoolName }: { schoolName: string }) {
           ? "Administrator"
           : profile.role === "student"
             ? "Student"
-            : "Staff"}
+            : profile.is_instructor
+              ? "Instructor"
+              : "Staff"}
       </div>
     </aside>
   );

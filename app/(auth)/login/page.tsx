@@ -44,6 +44,10 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
             Student <span className="font-mono">student@sample-dsm.local</span> /{" "}
             <span className="font-mono">Student@12345</span>
           </p>
+          <p>
+            Instructor <span className="font-mono">instructor@sample-dsm.local</span> /{" "}
+            <span className="font-mono">Instructor@12345</span>
+          </p>
         </div>
       </CardContent>
     </Card>

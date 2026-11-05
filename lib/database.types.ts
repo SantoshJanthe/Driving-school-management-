@@ -56,6 +56,7 @@ export type Database = {
           role: Database["public"]["Enums"]["user_role"];
           permissions: Json;
           is_active: boolean;
+          is_instructor: boolean;
           last_login_at: string | null;
           created_at: string;
           updated_at: string;
@@ -69,6 +70,7 @@ export type Database = {
           role?: Database["public"]["Enums"]["user_role"];
           permissions?: Json;
           is_active?: boolean;
+          is_instructor?: boolean;
           last_login_at?: string | null;
           created_at?: string;
           updated_at?: string;
@@ -82,6 +84,7 @@ export type Database = {
           role?: Database["public"]["Enums"]["user_role"];
           permissions?: Json;
           is_active?: boolean;
+          is_instructor?: boolean;
           last_login_at?: string | null;
           created_at?: string;
           updated_at?: string;

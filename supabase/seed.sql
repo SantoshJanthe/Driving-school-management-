@@ -114,6 +114,38 @@ from auth.users u
 where u.id = 'b0000000-0000-4000-8000-000000000003'
   and not exists (select 1 from auth.identities i where i.user_id = u.id and i.provider = 'email');
 
+insert into auth.users (
+  instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
+  raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
+  confirmation_token, recovery_token, email_change_token_new, email_change, is_sso_user
+)
+values (
+  '00000000-0000-0000-0000-000000000000',
+  'b0000000-0000-4000-8000-000000000004',
+  'authenticated', 'authenticated',
+  'instructor@sample-dsm.local',
+  extensions.crypt('Instructor@12345', extensions.gen_salt('bf')),
+  now(),
+  '{"provider": "email", "providers": ["email"]}'::jsonb,
+  '{"school_id": "a0000000-0000-4000-8000-000000000001", "full_name": "Arun Kulkarni", "role": "staff", "phone": "9811111112", "permissions": {}}'::jsonb,
+  now(), now(), '', '', '', '', false
+)
+on conflict (id) do nothing;
+
+insert into auth.identities (id, user_id, provider_id, identity_data, provider, last_sign_in_at, created_at, updated_at)
+select
+  gen_random_uuid(), u.id, u.id::text,
+  jsonb_build_object('sub', u.id::text, 'email', u.email, 'email_verified', true, 'phone_verified', false),
+  'email', now(), now(), now()
+from auth.users u
+where u.id = 'b0000000-0000-4000-8000-000000000004'
+  and not exists (select 1 from auth.identities i where i.user_id = u.id and i.provider = 'email');
+
+update public.profiles
+set is_instructor = true,
+    permissions = '{}'::jsonb
+where id = 'b0000000-0000-4000-8000-000000000004';
+
 insert into public.student_accounts (profile_id, school_id, applicant_id)
 values (
   'b0000000-0000-4000-8000-000000000003',
@@ -139,12 +171,12 @@ values (
   '07:00',
   '08:00',
   'LMV',
-  'b0000000-0000-4000-8000-000000000002',
+  'b0000000-0000-4000-8000-000000000004',
   'scheduled',
   'b0000000-0000-4000-8000-000000000001',
   'f0000000-0000-4000-8000-000000000001'
 )
-on conflict (id) do update set vehicle_id = excluded.vehicle_id;
+on conflict (id) do update set vehicle_id = excluded.vehicle_id, instructor_id = excluded.instructor_id;
 
 insert into public.payments (id, applicant_id, amount, payment_date, payment_mode, receipt_number, recorded_by)
 values (

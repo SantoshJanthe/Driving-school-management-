@@ -10,8 +10,11 @@ import { TodaySessions } from "@/components/dashboard/today-sessions";
 import { PageHeader } from "@/components/layout/page-header";
 import { StudentHomeView } from "@/components/student/student-home";
 import { requireProfile } from "@/lib/auth/guards";
-import { can } from "@/lib/auth/permissions";
+import { can, isInstructorOnly } from "@/lib/auth/permissions";
 import { getDashboardSummary, getRecentActivity, getTodaySessions } from "@/lib/queries/dashboard";
+import { listDaySessions } from "@/lib/queries/training";
+import { kolkataDate } from "@/lib/training/constants";
+import { InstructorToday } from "@/components/training/instructor-today";
 import { getOpenEnquiries } from "@/lib/queries/enquiries";
 import { getStudentHome } from "@/lib/queries/student-home";
 
@@ -35,6 +38,11 @@ export default async function DashboardPage() {
   if (profile.role === "student") {
     const home = await getStudentHome();
     return <StudentHomeView home={home} />;
+  }
+
+  if (isInstructorOnly(profile)) {
+    const rows = await listDaySessions({ date: kolkataDate(), instructorId: profile.id });
+    return <InstructorToday rows={rows} />;
   }
 
   const canViewApplicants = can(profile, "view_applicants");

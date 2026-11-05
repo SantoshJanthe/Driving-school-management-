@@ -61,3 +61,10 @@ export function can(subject: PermissionSubject | null | undefined, key: Permissi
 export function isAdmin(subject: PermissionSubject | null | undefined): boolean {
   return !!subject && subject.is_active && subject.role === "admin";
 }
+
+/** Staff flagged as instructors who were not given the school-wide applicant list. */
+export function isInstructorOnly(
+  subject: (PermissionSubject & { is_instructor?: boolean }) | null | undefined,
+): boolean {
+  return !!subject && subject.is_active && subject.role === "staff" && !!subject.is_instructor && !can(subject, "view_applicants");
+}
