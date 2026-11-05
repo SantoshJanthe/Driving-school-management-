@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
+import { reportError } from "@/lib/monitoring";
 
 export default function GlobalError({
   error,
@@ -12,8 +13,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Sentry wiring arrives in a later milestone; keep the digest visible for support.
-    console.error(error);
+    reportError(error);
   }, [error]);
 
   return (
