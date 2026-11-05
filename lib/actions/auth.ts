@@ -98,8 +98,21 @@ export async function changeOwnPassword(
   if (!parsed.success) {
     return { fieldErrors: fieldErrorsFrom(parsed.error.issues) };
   }
+  const current = String(formData.get("current") ?? "");
+  if (!current) return { error: "Enter your current password." };
 
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user?.email) return { error: "Sign in again before changing the password." };
+
+  const { error: currentError } = await supabase.auth.signInWithPassword({
+    email: user.email,
+    password: current,
+  });
+  if (currentError) return { error: "Current password is wrong." };
+
   const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
   if (error) {
     if (error.code === "same_password") {
@@ -110,7 +123,8 @@ export async function changeOwnPassword(
     }
     return { error: error.message };
   }
-  return { success: "Password updated." };
+  await supabase.auth.signOut({ scope: "others" });
+  return { success: "Password updated. Other sessions were signed out." };
 }
 
 export async function logout() {

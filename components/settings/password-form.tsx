@@ -33,6 +33,17 @@ export function PasswordForm() {
         <p className="text-sm text-destructive">{state.fieldErrors.password}</p>
       ) : null}
       <div className="grid gap-1.5">
+        <Label htmlFor="current-password">Current password</Label>
+        <Input
+          id="current-password"
+          name="current"
+          type="password"
+          required
+          autoComplete="current-password"
+          className="h-11"
+        />
+      </div>
+      <div className="grid gap-1.5">
         <Label htmlFor="new-password">New password</Label>
         <Input id="new-password" name="password" type="password" required autoComplete="new-password" className="h-11" />
       </div>
