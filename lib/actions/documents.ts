@@ -11,7 +11,7 @@ import {
   sanitizeFileName,
   storeDocumentFile,
 } from "@/lib/documents/files";
-import { requireAdmin, requirePermission } from "@/lib/auth/guards";
+import { requireAdmin, requirePermission, requireProfile } from "@/lib/auth/guards";
 import { createClient } from "@/lib/supabase/server";
 
 export type UploadState = { error?: string };
@@ -87,6 +87,70 @@ export async function uploadDocument(_prev: UploadState, formData: FormData): Pr
       ? requested.split("?")[0]
       : fallback;
   redirect(`${safe}?notice=uploaded`);
+}
+
+export async function uploadStudentDocument(
+  _prev: UploadState,
+  formData: FormData,
+): Promise<UploadState> {
+  const profile = await requireProfile();
+  if (profile.role !== "student") return { error: "Only a student can use this upload." };
+
+  const typeRaw = String(formData.get("document_type") ?? "other");
+  const file = formData.get("file");
+  if (!isDocumentType(typeRaw)) return { error: "Choose a document type." };
+  if (!(file instanceof File) || file.size === 0) return { error: "Choose a file." };
+  if (file.size > maxUploadBytes()) return { error: "File must be 10 MB or smaller." };
+
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  const safeName = sanitizeFileName(file.name);
+  if (!matchesDeclaredType(safeName, file.type, bytes)) {
+    return { error: "Use a PDF, JPG, PNG, or WEBP file. The file contents must match its type." };
+  }
+
+  const supabase = await createClient();
+  const { data: link } = await supabase
+    .from("student_accounts")
+    .select("applicant_id")
+    .limit(1)
+    .maybeSingle();
+  if (!link) return { error: "Your login is not connected to a learner record." };
+
+  const { data: applicant } = await supabase
+    .from("applicants")
+    .select("id, school_id")
+    .eq("id", link.applicant_id)
+    .maybeSingle();
+  if (!applicant || applicant.school_id !== profile.school_id) {
+    return { error: "That record is not available." };
+  }
+
+  const documentId = crypto.randomUUID();
+  const storagePath = `${applicant.school_id}/${applicant.id}/${documentId}-${safeName}`;
+  try {
+    await storeDocumentFile(supabase, storagePath, bytes, file.type);
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "Could not store the file." };
+  }
+
+  const { error } = await supabase.from("documents").insert({
+    id: documentId,
+    school_id: applicant.school_id,
+    applicant_id: applicant.id,
+    document_type: typeRaw,
+    file_name: safeName,
+    storage_path: storagePath,
+    file_size: file.size,
+    mime_type: file.type,
+    uploaded_by: profile.id,
+  });
+  if (error) {
+    await removeDocumentFile(supabase, storagePath);
+    return { error: permissionMessage(error) };
+  }
+
+  revalidatePath("/dashboard");
+  redirect("/dashboard");
 }
 
 export async function archiveDocument(formData: FormData) {

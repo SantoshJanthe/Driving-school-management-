@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { PageHeader } from "@/components/layout/page-header";
+import { StudentUpload } from "@/components/student/upload-document";
 import { DOCUMENT_TYPE_LABELS } from "@/lib/documents/constants";
 import { formatDate, formatINR, formatPhone } from "@/lib/format";
 import type { StudentHome, StudentSession } from "@/lib/queries/student-home";
@@ -161,6 +162,7 @@ export function StudentHomeView({ home }: { home: StudentHome | null }) {
         <h2 id="documents-heading" className="text-sm font-semibold tracking-wide uppercase">
           Documents
         </h2>
+        <StudentUpload />
         {home.documents.length === 0 ? (
           <p className="text-sm text-muted-foreground">No documents yet.</p>
         ) : (
