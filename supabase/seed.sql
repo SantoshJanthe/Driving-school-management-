@@ -185,7 +185,7 @@ insert into public.training_sessions (
 values (
   'd0000000-0000-4000-8000-000000000004',
   'c0000000-0000-4000-8000-000000000003',
-  current_date - 7,
+  current_date - 1,
   '09:00',
   '10:00',
   'LMV',

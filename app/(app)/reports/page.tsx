@@ -40,6 +40,32 @@ export default async function ReportsPage() {
           </div>
         ))}
       </dl>
+      <section className="grid gap-3" aria-labelledby="instructors-heading">
+        <h2 id="instructors-heading" className="text-sm font-semibold tracking-wide uppercase">
+          Instructor performance
+        </h2>
+        <p className="text-sm text-muted-foreground">Lessons completed this month.</p>
+        {report.instructors.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No completed lessons this month.</p>
+        ) : (
+          <table className="w-full overflow-hidden rounded-2xl border border-black/10 bg-[#fffcf7] text-sm">
+            <thead className="text-left text-xs tracking-wide text-muted-foreground uppercase">
+              <tr>
+                <th className="px-4 py-3 font-medium">Instructor</th>
+                <th className="px-4 py-3 font-medium">Completed</th>
+              </tr>
+            </thead>
+            <tbody>
+              {report.instructors.map((row) => (
+                <tr key={row.name} className="border-t border-black/10">
+                  <td className="px-4 py-3">{row.name}</td>
+                  <td className="px-4 py-3">{row.completed}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </section>
     </div>
   );
 }
