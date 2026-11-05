@@ -100,6 +100,13 @@ export function EnquiryForm({
           placeholder="Preferred time of day, or a question"
         />
       </div>
+      <label className="flex items-start gap-2 text-sm">
+        <input type="checkbox" name="consent" required className="mt-1 size-4" />
+        <span>
+          I agree that the school may keep my name, mobile number, and email so it can reply to
+          this enquiry. The school does not use them for anything else.
+        </span>
+      </label>
       <SubmitButton pendingText="Sending…" className="md:w-fit">
         Send enquiry
       </SubmitButton>

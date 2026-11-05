@@ -8,6 +8,9 @@ export async function submitEnquiry(
   _prev: EnquiryState,
   formData: FormData,
 ): Promise<EnquiryState> {
+  if (formData.get("consent") !== "on") {
+    return { error: "Agree to the notice before sending the enquiry." };
+  }
   const supabase = await createClient();
   const schoolId = String(formData.get("school_id") ?? "").trim();
   const { error } = await supabase.rpc("submit_enquiry", {
