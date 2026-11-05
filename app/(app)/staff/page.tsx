@@ -65,7 +65,9 @@ export default async function StaffPage({
                   <td className="hidden px-4 py-3 text-muted-foreground md:table-cell">
                     {member.email}
                   </td>
-                  <td className="px-4 py-3 capitalize">{member.role}</td>
+                  <td className="px-4 py-3 capitalize">
+                    {member.is_instructor ? "Instructor" : member.role}
+                  </td>
                   <td className="hidden px-4 py-3 text-muted-foreground lg:table-cell">
                     {member.last_login_at ? formatDateTime(member.last_login_at) : "—"}
                   </td>

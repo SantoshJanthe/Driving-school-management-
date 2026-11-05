@@ -1,7 +1,7 @@
 "use client";
 
 import { UserPlus } from "lucide-react";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
 import { SubmitButton } from "@/components/auth/submit-button";
 import { PermissionsEditor } from "@/components/staff/permissions-editor";
@@ -26,6 +26,8 @@ const selectClass =
 
 export function InviteDialog() {
   const [state, action] = useActionState(inviteStaff, initial);
+  const [role, setRole] = useState("staff");
+  const [instructor, setInstructor] = useState(false);
 
   return (
     <Dialog>
@@ -62,12 +64,40 @@ export function InviteDialog() {
           </div>
           <div className="grid gap-1.5">
             <Label htmlFor="invite-role">Role</Label>
-            <select id="invite-role" name="role" defaultValue="staff" className={selectClass}>
+            <select
+              id="invite-role"
+              name="role"
+              value={role}
+              onChange={(event) => {
+                setRole(event.target.value);
+                if (event.target.value !== "staff") setInstructor(false);
+              }}
+              className={selectClass}
+            >
               <option value="staff">Staff</option>
               <option value="admin">Admin</option>
             </select>
           </div>
-          <PermissionsEditor permissions={DEFAULT_STAFF_PERMISSIONS} />
+          {role === "staff" ? (
+          <label className="flex min-h-11 items-start gap-2 text-sm">
+            <input
+              type="checkbox"
+              name="is_instructor"
+              checked={instructor}
+              onChange={(event) => setInstructor(event.target.checked)}
+              className="mt-1 size-4"
+            />
+            <span>
+              Instructor
+              <span className="mt-0.5 block text-xs text-muted-foreground">
+                They see only today’s own students, not fees or other staff.
+              </span>
+            </span>
+          </label>
+          ) : null}
+          {role === "staff" && !instructor ? (
+            <PermissionsEditor permissions={DEFAULT_STAFF_PERMISSIONS} />
+          ) : null}
           <SubmitButton pendingText="Sending invite…" className="md:w-fit">
             Send invite
           </SubmitButton>

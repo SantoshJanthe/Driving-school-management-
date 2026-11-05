@@ -62,9 +62,18 @@ export function isAdmin(subject: PermissionSubject | null | undefined): boolean 
   return !!subject && subject.is_active && subject.role === "admin";
 }
 
-/** Staff flagged as instructors who were not given the school-wide applicant list. */
+/** Staff marked as instructors see only the lessons they teach. */
 export function isInstructorOnly(
   subject: (PermissionSubject & { is_instructor?: boolean }) | null | undefined,
 ): boolean {
-  return !!subject && subject.is_active && subject.role === "staff" && !!subject.is_instructor && !can(subject, "view_applicants");
+  return !!subject && subject.is_active && subject.role === "staff" && !!subject.is_instructor;
 }
+
+export const NO_STAFF_PERMISSIONS: Permissions = {
+  view_applicants: false,
+  create_applicant: false,
+  edit_applicant: false,
+  add_payment: false,
+  manage_training: false,
+  view_financials: false,
+};

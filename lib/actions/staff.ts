@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth/guards";
 import {
   DEFAULT_STAFF_PERMISSIONS,
+  NO_STAFF_PERMISSIONS,
   PERMISSION_KEYS,
   type Permission,
   type Permissions,
@@ -47,7 +48,12 @@ export async function inviteStaff(
     .toLowerCase();
   const phone = String(formData.get("phone") ?? "").trim();
   const role = readRole(formData.get("role")) ?? "staff";
-  const permissions = role === "admin" ? DEFAULT_STAFF_PERMISSIONS : readPermissions(formData);
+  const instructor = role === "staff" && formData.get("is_instructor") === "on";
+  const permissions = instructor
+    ? NO_STAFF_PERMISSIONS
+    : role === "admin"
+      ? DEFAULT_STAFF_PERMISSIONS
+      : readPermissions(formData);
 
   if (fullName.length < 2) return { error: "Enter the staff member's name." };
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { error: "Enter a valid email." };
@@ -65,6 +71,15 @@ export async function inviteStaff(
   });
   if (error || !data.user) {
     return { error: error?.message ?? "Could not send the invite." };
+  }
+
+  if (instructor) {
+    const supabase = await createClient();
+    const { error: flagError } = await supabase
+      .from("profiles")
+      .update({ is_instructor: true, permissions: NO_STAFF_PERMISSIONS })
+      .eq("id", data.user.id);
+    if (flagError) return { error: permissionMessage(flagError) };
   }
 
   revalidatePath("/staff");
@@ -87,12 +102,22 @@ export async function updateStaff(
     return { error: "You cannot change your own role." };
   }
 
-  const permissions: Permissions =
-    role === "admin" ? DEFAULT_STAFF_PERMISSIONS : readPermissions(formData);
+  const instructor = role === "staff" && formData.get("is_instructor") === "on";
+  const permissions: Permissions = instructor
+    ? NO_STAFF_PERMISSIONS
+    : role === "admin"
+      ? DEFAULT_STAFF_PERMISSIONS
+      : readPermissions(formData);
   const supabase = await createClient();
   const { error } = await supabase
     .from("profiles")
-    .update({ full_name: fullName, phone: phone || null, role, permissions })
+    .update({
+      full_name: fullName,
+      phone: phone || null,
+      role,
+      permissions,
+      is_instructor: instructor,
+    })
     .eq("id", id);
   if (error) return { error: permissionMessage(error) };
 

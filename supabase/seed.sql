@@ -143,7 +143,7 @@ where u.id = 'b0000000-0000-4000-8000-000000000004'
 
 update public.profiles
 set is_instructor = true,
-    permissions = '{"view_applicants":false,"create_applicant":false,"edit_applicant":false,"add_payment":false,"manage_training":true,"view_financials":false}'::jsonb
+    permissions = '{"view_applicants":false,"create_applicant":false,"edit_applicant":false,"add_payment":false,"manage_training":false,"view_financials":false}'::jsonb
 where id = 'b0000000-0000-4000-8000-000000000004';
 
 insert into public.student_accounts (profile_id, school_id, applicant_id)

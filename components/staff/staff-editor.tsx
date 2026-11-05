@@ -15,6 +15,7 @@ const initial: StaffFormState = {};
 export function StaffEditor({ member, self }: { member: StaffMember; self: boolean }) {
   const [state, action] = useActionState(updateStaff, initial);
   const [role, setRole] = useState(member.role);
+  const [instructor, setInstructor] = useState(member.is_instructor);
 
   return (
     <form
@@ -81,7 +82,26 @@ export function StaffEditor({ member, self }: { member: StaffMember; self: boole
           <p className="text-xs text-muted-foreground">You cannot change your own role.</p>
         ) : null}
       </fieldset>
-      {role === "staff" ? <PermissionsEditor permissions={member.permissions} /> : null}
+      {role === "staff" ? (
+        <label className="flex min-h-11 items-start gap-2 text-sm">
+          <input
+            type="checkbox"
+            name="is_instructor"
+            checked={instructor}
+            onChange={(event) => setInstructor(event.target.checked)}
+            className="mt-1 size-4"
+          />
+          <span>
+            Instructor
+            <span className="mt-0.5 block text-xs text-muted-foreground">
+              This login sees only today’s own students. Fees, applicants, and other staff stay hidden.
+            </span>
+          </span>
+        </label>
+      ) : null}
+      {role === "staff" && !instructor ? (
+        <PermissionsEditor permissions={member.permissions} />
+      ) : null}
       <SubmitButton pendingText="Saving…" className="md:w-fit">
         Save changes
       </SubmitButton>

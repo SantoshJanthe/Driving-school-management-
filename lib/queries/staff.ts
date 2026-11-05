@@ -10,6 +10,7 @@ export type StaffMember = {
   role: Role;
   permissions: Permissions;
   is_active: boolean;
+  is_instructor: boolean;
   last_login_at: string | null;
 };
 
@@ -17,7 +18,7 @@ export async function listStaff(): Promise<StaffMember[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, full_name, email, phone, role, permissions, is_active, last_login_at")
+    .select("id, full_name, email, phone, role, permissions, is_active, is_instructor, last_login_at")
     .order("role")
     .order("full_name");
   if (error) throw new Error(error.message);
@@ -28,7 +29,7 @@ export async function getStaffMember(id: string): Promise<StaffMember | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, full_name, email, phone, role, permissions, is_active, last_login_at")
+    .select("id, full_name, email, phone, role, permissions, is_active, is_instructor, last_login_at")
     .eq("id", id)
     .maybeSingle();
   if (error) throw new Error(error.message);
@@ -43,6 +44,7 @@ function toMember(row: {
   role: Role;
   permissions: Json;
   is_active: boolean;
+  is_instructor: boolean;
   last_login_at: string | null;
 }): StaffMember {
   return {
@@ -53,6 +55,7 @@ function toMember(row: {
     role: row.role,
     permissions: parsePermissions(row.permissions),
     is_active: row.is_active,
+    is_instructor: row.is_instructor,
     last_login_at: row.last_login_at,
   };
 }
