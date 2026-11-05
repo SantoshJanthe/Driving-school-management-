@@ -27,6 +27,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/applicants", label: "Applicants", icon: Users, permission: "view_applicants" },
   { href: "/payments", label: "Payments", icon: IndianRupee, permission: "view_financials" },
+  { href: "/fees", label: "Balances", icon: IndianRupee, permission: "view_financials" },
   { href: "/documents", label: "Documents", icon: FileText, permission: "view_applicants" },
   { href: "/training", label: "Training", icon: CarFront, permission: "view_applicants" },
   { href: "/staff", label: "Staff", icon: UserCog, adminOnly: true },
