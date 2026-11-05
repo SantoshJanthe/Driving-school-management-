@@ -134,7 +134,7 @@ Do not paste the secret into chat, and do not commit `.env.local`. Switch to liv
 
 ## Restore a backup
 
-An admin can download students and payments as `school-backup.csv` from Reports. The file has a `student` section and a `payment` section. It is a copy of those rows, not a full database dump. To restore, create the school again and enter the students and payments from the file, or load the CSV with a database tool into an empty school. Keep the file private. It does not include documents or a full Aadhaar number.
+An admin can download a spreadsheet as `school-backup.csv` from Reports. The file has a `student` section, a `payment` section, a `session` section, and a `document` section. The document section lists file name, type, size, and upload time. It does not include the file bytes. It is a copy of those rows, not a full database dump. To restore, create the school again and enter the rows from the file, or load the CSV with a database tool into an empty school. Put the document files back into storage separately. Keep the file private. It does not include a full Aadhaar number.
 
 ## Layout
 
