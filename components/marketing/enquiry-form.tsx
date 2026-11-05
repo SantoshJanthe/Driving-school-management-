@@ -16,9 +16,11 @@ const initial: EnquiryState = {};
 export function EnquiryForm({
   packages,
   selected,
+  schoolId,
 }: {
   packages: CoursePackage[];
   selected?: string;
+  schoolId?: string;
 }) {
   const [state, action] = useActionState(submitEnquiry, initial);
 
@@ -35,6 +37,7 @@ export function EnquiryForm({
 
   return (
     <form id="enquire" action={action} className="grid gap-4">
+      {schoolId ? <input type="hidden" name="school_id" value={schoolId} /> : null}
       {state.error ? (
         <Alert variant="destructive" role="alert">
           <AlertDescription>{state.error}</AlertDescription>

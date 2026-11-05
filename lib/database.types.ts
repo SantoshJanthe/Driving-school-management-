@@ -554,11 +554,15 @@ export type Database = {
         Returns: Database["public"]["Tables"]["applicants"]["Row"][];
       };
       public_school: {
+        Args: { p_school?: string | null };
+        Returns: Json;
+      };
+      public_schools: {
         Args: Record<string, never>;
         Returns: Json;
       };
       school_logo_path: {
-        Args: Record<string, never>;
+        Args: { p_school?: string | null };
         Returns: string;
       };
       submit_enquiry: {
@@ -568,6 +572,7 @@ export type Database = {
           p_email?: string | null;
           p_package_code: string;
           p_message?: string | null;
+          p_school?: string | null;
         };
         Returns: string;
       };

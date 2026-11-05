@@ -9,9 +9,12 @@ const TYPES: Record<string, string> = {
   webp: "image/webp",
 };
 
-export async function GET() {
+export async function GET(request: Request) {
+  const school = new URL(request.url).searchParams.get("school");
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("school_logo_path");
+  const { data, error } = await supabase.rpc("school_logo_path", {
+    p_school: school || null,
+  });
   if (error || typeof data !== "string" || !data.startsWith("var/school-logos/")) {
     return new Response(null, { status: 404 });
   }

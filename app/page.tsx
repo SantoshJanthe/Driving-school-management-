@@ -15,6 +15,7 @@ export const metadata: Metadata = {
 };
 
 type PublicSchool = {
+  id: string | null;
   name: string;
   address: string | null;
   phone: string | null;
@@ -23,22 +24,43 @@ type PublicSchool = {
   hasLogo: boolean;
 };
 
-async function loadSchool(): Promise<PublicSchool> {
-  const fallback: PublicSchool = {
-    name: "Driving school",
-    address: null,
-    phone: null,
-    email: null,
-    packages: parsePackages(null),
-    hasLogo: false,
-  };
+type PublicChoice = { id: string; name: string };
+
+const fallbackSchool: PublicSchool = {
+  id: null,
+  name: "Driving school",
+  address: null,
+  phone: null,
+  email: null,
+  packages: parsePackages(null),
+  hasLogo: false,
+};
+
+async function loadChoices(): Promise<PublicChoice[]> {
   try {
     const supabase = await createClient();
-    const { data, error } = await supabase.rpc("public_school");
-    if (error || !data || typeof data !== "object" || Array.isArray(data)) return fallback;
+    const { data, error } = await supabase.rpc("public_schools");
+    if (error || !Array.isArray(data)) return [];
+    return data.flatMap((row) => {
+      if (!row || typeof row !== "object" || Array.isArray(row)) return [];
+      const item = row as Record<string, unknown>;
+      if (typeof item.id !== "string" || typeof item.name !== "string" || !item.name) return [];
+      return [{ id: item.id, name: item.name }];
+    });
+  } catch {
+    return [];
+  }
+}
+
+async function loadSchool(schoolId: string | null): Promise<PublicSchool> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("public_school", { p_school: schoolId });
+    if (error || !data || typeof data !== "object" || Array.isArray(data)) return fallbackSchool;
     const row = data as Record<string, unknown>;
     return {
-      name: typeof row.name === "string" && row.name ? row.name : fallback.name,
+      id: schoolId,
+      name: typeof row.name === "string" && row.name ? row.name : fallbackSchool.name,
       address: typeof row.address === "string" ? row.address : null,
       phone: typeof row.phone === "string" ? row.phone : null,
       email: typeof row.email === "string" ? row.email : null,
@@ -46,17 +68,20 @@ async function loadSchool(): Promise<PublicSchool> {
       hasLogo: row.has_logo === true,
     };
   } catch {
-    return fallback;
+    return fallbackSchool;
   }
 }
 
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: Promise<{ course?: string }>;
+  searchParams: Promise<{ course?: string; school?: string }>;
 }) {
-  const school = await loadSchool();
-  const { course } = await searchParams;
+  const { course, school: requestedSchool } = await searchParams;
+  const choices = await loadChoices();
+  const selected = choices.find((item) => item.id === requestedSchool) ?? choices[0] ?? null;
+  const school = await loadSchool(selected?.id ?? null);
+  const schoolQuery = selected ? `school=${selected.id}&` : "";
 
   return (
     <div className="page-enter mx-auto flex min-h-dvh w-full max-w-5xl flex-col gap-16 px-4 py-8 md:px-8 md:py-12">
@@ -64,7 +89,11 @@ export default async function HomePage({
         <div className="flex items-center gap-3">
           {school.hasLogo ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src="/api/branding/logo" alt="" className="size-10 rounded-xl object-cover" />
+            <img
+              src={selected ? `/api/branding/logo?school=${selected.id}` : "/api/branding/logo"}
+              alt=""
+              className="size-10 rounded-xl object-cover"
+            />
           ) : (
             <SchoolLogo className="size-10 rounded-xl" />
           )}
@@ -89,6 +118,34 @@ export default async function HomePage({
           </Button>
         </nav>
       </header>
+
+      {choices.length > 1 ? (
+        <form action="/" className="flex flex-wrap items-end gap-3">
+          <div className="grid gap-1.5">
+            <label htmlFor="school-picker" className="text-sm font-medium">
+              School
+            </label>
+            <select
+              id="school-picker"
+              name="school"
+              defaultValue={selected?.id}
+              className="h-11 min-w-64 rounded-lg border border-black/10 bg-[#fffcf7] px-2.5 text-sm"
+            >
+              {choices.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button
+            type="submit"
+            className="h-11 rounded-lg border border-black/10 bg-white px-4 text-sm font-medium"
+          >
+            Show this school
+          </button>
+        </form>
+      ) : null}
 
       <section className="grid gap-4">
         <h1 className="max-w-2xl text-4xl font-medium tracking-tight md:text-5xl">
@@ -118,7 +175,7 @@ export default async function HomePage({
               <p className="text-2xl font-medium">{formatINR(item.fee)}</p>
               <p className="text-xs text-muted-foreground">{item.sessions} sessions included</p>
               <Button asChild variant="outline" className="mt-auto h-11">
-                <Link href={`/?course=${item.code}#enquire`}>Enquire about this course</Link>
+                <Link href={`/?${schoolQuery}course=${item.code}#enquire`}>Enquire about this course</Link>
               </Button>
             </li>
           ))}
@@ -207,7 +264,7 @@ export default async function HomePage({
         </div>
         <div className="rounded-2xl border border-black/10 bg-[#fffcf7] p-5 shadow-[0_18px_50px_rgba(26,25,22,0.05)]">
           <h2 className="mb-4 text-lg font-medium">Send an enquiry</h2>
-          <EnquiryForm packages={school.packages} selected={course} />
+          <EnquiryForm packages={school.packages} selected={course} schoolId={selected?.id} />
         </div>
       </section>
     </div>
