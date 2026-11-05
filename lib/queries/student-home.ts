@@ -36,6 +36,7 @@ export type StudentPayment = {
   payment_date: string;
   payment_mode: string;
   receipt_number: string | null;
+  remarks: string | null;
 };
 
 export type StudentHome = {
@@ -140,7 +141,7 @@ export async function getStudentHome(): Promise<StudentHome | null> {
       .order("uploaded_at", { ascending: false }),
     supabase
       .from("payments")
-      .select("id, amount, payment_date, payment_mode, receipt_number")
+      .select("id, amount, payment_date, payment_mode, receipt_number, remarks")
       .eq("applicant_id", link.applicant_id)
       .order("payment_date", { ascending: false }),
   ]);

@@ -180,6 +180,7 @@ export function StudentHomeView({ home }: { home: StudentHome | null }) {
                 <span>
                   {formatDate(payment.payment_date)} · {payment.payment_mode}
                   {payment.receipt_number ? ` · ${payment.receipt_number}` : ""}
+                  {payment.remarks ? ` · ${payment.remarks}` : ""}
                 </span>
                 <span className="font-medium">{formatINR(payment.amount)}</span>
               </li>
