@@ -132,6 +132,10 @@ RAZORPAY_KEY_SECRET=...
 
 Do not paste the secret into chat, and do not commit `.env.local`. Switch to live keys only when you are ready to take real payments.
 
+## Restore a backup
+
+An admin can download students and payments as `school-backup.csv` from Reports. The file has a `student` section and a `payment` section. It is a copy of those rows, not a full database dump. To restore, create the school again and enter the students and payments from the file, or load the CSV with a database tool into an empty school. Keep the file private. It does not include documents or a full Aadhaar number.
+
 ## Layout
 
 ```text
