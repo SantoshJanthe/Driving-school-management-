@@ -134,7 +134,9 @@ Do not paste the secret into chat, and do not commit `.env.local`. Switch to liv
 
 ## Scheduled database backup
 
-A backup was not run from this machine, and this machine is not a cloud scheduler.
+`crontab` is not available on this machine, so a daily job was not installed. The schedule below is the step to run on a host that has cron.
+
+A restore was tested on 6 Nov 2026, 12:39 am IST. `pg_dump -Fc` of the local `dsm_local` database was restored into an empty database named `dsm_restore_scratch`. The scratch copy had the same 4 applicants, 2 payments, and 4 schools, including Meera Joshi’s balance of ₹5,900. The scratch database and the dump file were then removed. This was not a scheduled backup, and it did not include files under `var/`.
 
 On Supabase, open the project, then Database → Backups, and turn on daily backups. Keep at least 30 days. That backup includes the database. It does not include files stored only on the app server under `var/`.
 
