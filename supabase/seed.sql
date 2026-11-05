@@ -178,6 +178,49 @@ values (
 )
 on conflict (id) do update set vehicle_id = excluded.vehicle_id, instructor_id = excluded.instructor_id;
 
+insert into public.training_sessions (
+  id, applicant_id, session_date, start_time, end_time, vehicle_type,
+  instructor_id, status, attendance, created_by, vehicle_id
+)
+values (
+  'd0000000-0000-4000-8000-000000000004',
+  'c0000000-0000-4000-8000-000000000003',
+  current_date - 7,
+  '09:00',
+  '10:00',
+  'LMV',
+  'b0000000-0000-4000-8000-000000000004',
+  'completed',
+  'present',
+  'b0000000-0000-4000-8000-000000000001',
+  'f0000000-0000-4000-8000-000000000001'
+)
+on conflict (id) do nothing;
+
+update public.applicants
+set ll_number = 'MH12 2026001234',
+    ll_issued_on = current_date - 30,
+    dl_test_date = current_date + 14,
+    dl_result = 'pending',
+    application_number = 'MH/2026/00421'
+where id = 'c0000000-0000-4000-8000-000000000003';
+
+insert into public.documents (
+  id, school_id, applicant_id, document_type, file_name, storage_path, file_size, mime_type, uploaded_by
+)
+values (
+  'd1000000-0000-4000-8000-000000000003',
+  'a0000000-0000-4000-8000-000000000001',
+  'c0000000-0000-4000-8000-000000000003',
+  'id_proof',
+  'identity.pdf',
+  'a0000000-0000-4000-8000-000000000001/c0000000-0000-4000-8000-000000000003/d1000000-0000-4000-8000-000000000003-identity.pdf',
+  24,
+  'application/pdf',
+  'b0000000-0000-4000-8000-000000000001'
+)
+on conflict (id) do nothing;
+
 insert into public.payments (id, applicant_id, amount, payment_date, payment_mode, receipt_number, recorded_by)
 values (
   'e0000000-0000-4000-8000-000000000003',

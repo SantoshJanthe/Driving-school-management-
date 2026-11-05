@@ -1,10 +1,23 @@
-import { requirePermission } from "@/lib/auth/guards";
+import { requireProfile } from "@/lib/auth/guards";
+import { can } from "@/lib/auth/permissions";
 import { formatDate, formatINR, formatPhone } from "@/lib/format";
 import { getReceipt } from "@/lib/queries/fees";
+import { createClient } from "@/lib/supabase/server";
 
 export async function GET(_request: Request, context: { params: Promise<{ id: string }> }) {
-  await requirePermission("view_financials");
+  const profile = await requireProfile();
   const { id } = await context.params;
+  if (profile.role === "student") {
+    const supabase = await createClient();
+    const { data: link } = await supabase
+      .from("student_accounts")
+      .select("applicant_id")
+      .eq("applicant_id", id)
+      .maybeSingle();
+    if (!link) return new Response("Not found", { status: 404 });
+  } else if (!can(profile, "view_financials")) {
+    return new Response("Not found", { status: 404 });
+  }
   const receipt = await getReceipt(id);
   if (!receipt) return new Response("Not found", { status: 404 });
   const { applicant, school, payments } = receipt;
