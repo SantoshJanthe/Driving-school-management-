@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 
 import { requireProfile } from "@/lib/auth/guards";
+import { clearLoginLock, loginLockMessage, recordFailedLogin } from "@/lib/auth/lockout";
 import { createClient } from "@/lib/supabase/server";
 import { DEACTIVATED_MESSAGE, NO_PROFILE_MESSAGE } from "@/lib/auth/messages";
 import { env } from "@/lib/env";
@@ -38,6 +39,9 @@ export async function login(_prev: AuthFormState, formData: FormData): Promise<A
     return { fieldErrors: fieldErrorsFrom(parsed.error.issues) };
   }
 
+  const locked = await loginLockMessage(parsed.data.email);
+  if (locked) return { error: locked };
+
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({
     email: parsed.data.email,
@@ -48,8 +52,15 @@ export async function login(_prev: AuthFormState, formData: FormData): Promise<A
     if (error.code === "over_request_rate_limit" || error.status === 429) {
       return { error: "Too many attempts. Please wait a few minutes and try again." };
     }
-    return { error: "Incorrect email or password" };
+    const nowLocked = await recordFailedLogin(parsed.data.email);
+    return {
+      error: nowLocked
+        ? "Too many attempts for this email. Try again in 15 minutes."
+        : "Incorrect email or password",
+    };
   }
+
+  await clearLoginLock(parsed.data.email);
 
   // Deactivated users can still authenticate with Supabase Auth until the admin
   // ban propagates; the profile flag is the source of truth, so check it here.
@@ -66,6 +77,11 @@ export async function login(_prev: AuthFormState, formData: FormData): Promise<A
   // Best effort: the login row is useful for the activity log but must never
   // block sign-in.
   await supabase.rpc("log_event", { p_action: "login", p_entity_type: "auth" });
+
+  const { data: assurance } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (assurance?.nextLevel === "aal2" && assurance.currentLevel !== "aal2") {
+    redirect("/login/mfa");
+  }
 
   redirect(safeNextPath(parsed.data.next));
 }

@@ -535,6 +535,27 @@ export type Database = {
           },
         ];
       };
+      login_locks: {
+        Row: {
+          email: string;
+          failures: number;
+          locked_until: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          email: string;
+          failures?: number;
+          locked_until?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          email?: string;
+          failures?: number;
+          locked_until?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {

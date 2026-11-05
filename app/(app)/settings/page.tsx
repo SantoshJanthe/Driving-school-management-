@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { PageHeader } from "@/components/layout/page-header";
+import { MfaPanel } from "@/components/settings/mfa-panel";
 import { PasswordForm } from "@/components/settings/password-form";
 import { SchoolForm } from "@/components/settings/school-form";
 import { requireProfile } from "@/lib/auth/guards";
@@ -29,6 +30,7 @@ export default async function SettingsPage() {
         }
       />
       <PasswordForm />
+      {admin ? <MfaPanel /> : null}
       {!limited && school ? (
         admin ? (
           <SchoolForm

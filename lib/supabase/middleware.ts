@@ -55,6 +55,16 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname, search } = request.nextUrl;
 
+  if (user && pathname !== "/login/mfa") {
+    const { data: assurance } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (assurance?.nextLevel === "aal2" && assurance.currentLevel !== "aal2") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login/mfa";
+      url.search = "";
+      return NextResponse.redirect(url);
+    }
+  }
+
   if (pathname === "/" && user) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
@@ -70,7 +80,7 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (user && matches(pathname, AUTH_ONLY_PATHS)) {
+  if (user && pathname !== "/login/mfa" && matches(pathname, AUTH_ONLY_PATHS)) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     url.search = "";
