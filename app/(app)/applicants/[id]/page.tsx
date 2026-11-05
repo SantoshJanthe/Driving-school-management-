@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { LicenceChecklist } from "@/components/applicants/licence-checklist";
 import { GENDER_LABELS } from "@/lib/applicants/labels";
+import { DOCUMENT_TYPES, type DocumentType } from "@/lib/documents/constants";
 import { formatDate, formatINR, formatPhone } from "@/lib/format";
 import { requirePermission } from "@/lib/auth/guards";
+import { can } from "@/lib/auth/permissions";
 import { getApplicant } from "@/lib/queries/applicants";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Applicant" };
 
@@ -22,10 +26,24 @@ export default async function ApplicantOverviewPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requirePermission("view_applicants");
+  const profile = await requirePermission("view_applicants");
   const { id } = await params;
   const applicant = await getApplicant(id);
   if (!applicant) notFound();
+  const supabase = await createClient();
+  const { data: checklist } = await supabase
+    .from("applicants")
+    .select("ll_number, ll_issued_on, dl_test_date, dl_result")
+    .eq("id", id)
+    .maybeSingle();
+  const { data: documents } = await supabase
+    .from("documents")
+    .select("document_type")
+    .eq("applicant_id", id)
+    .eq("is_archived", false);
+  const uploaded = new Set((documents ?? []).map((row) => row.document_type));
+  const required: DocumentType[] = DOCUMENT_TYPES.filter((type) => type !== "other");
+  const missing = required.filter((type) => !uploaded.has(type));
 
   const address = [applicant.address, applicant.city, applicant.state, applicant.pincode]
     .filter(Boolean)
@@ -82,6 +100,15 @@ export default async function ApplicantOverviewPage({
           </dl>
         </section>
       </div>
+      <LicenceChecklist
+        applicantId={applicant.id}
+        llNumber={checklist?.ll_number ?? ""}
+        llIssuedOn={checklist?.ll_issued_on ?? ""}
+        dlTestDate={checklist?.dl_test_date ?? ""}
+        dlResult={checklist?.dl_result ?? ""}
+        missing={missing}
+        canEdit={can(profile, "edit_applicant")}
+      />
       <section className="grid gap-2">
         <h3 className="text-sm font-semibold">Notes</h3>
         <p className="text-sm whitespace-pre-wrap">{applicant.notes || "—"}</p>

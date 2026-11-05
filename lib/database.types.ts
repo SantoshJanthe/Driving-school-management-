@@ -163,6 +163,10 @@ export type Database = {
           balance_due: number;
           assigned_staff_id: string | null;
           notes: string | null;
+          ll_number: string | null;
+          ll_issued_on: string | null;
+          dl_test_date: string | null;
+          dl_result: string | null;
           created_by: string | null;
           created_at: string;
           updated_at: string;
@@ -190,6 +194,10 @@ export type Database = {
           balance_due?: number;
           assigned_staff_id?: string | null;
           notes?: string | null;
+          ll_number?: string | null;
+          ll_issued_on?: string | null;
+          dl_test_date?: string | null;
+          dl_result?: string | null;
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;
@@ -217,6 +225,10 @@ export type Database = {
           balance_due?: number;
           assigned_staff_id?: string | null;
           notes?: string | null;
+          ll_number?: string | null;
+          ll_issued_on?: string | null;
+          dl_test_date?: string | null;
+          dl_result?: string | null;
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;
