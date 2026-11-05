@@ -70,9 +70,9 @@ export default async function SettingsPage() {
             </section>
           </div>
         )
-      ) : (
+      ) : !limited ? (
         <p className="text-sm text-muted-foreground">School details are not available.</p>
-      )}
+      ) : null}
     </div>
   );
 }
