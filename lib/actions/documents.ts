@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { isDocumentType } from "@/lib/documents/constants";
+import { isDocumentType, type DocumentType } from "@/lib/documents/constants";
 import { pathInsideApplicant } from "@/lib/documents/paths";
 import {
   copyStoredFile,
@@ -22,7 +22,7 @@ async function keepPreviousVersions(
   supabase: Awaited<ReturnType<typeof createClient>>,
   schoolId: string,
   applicantId: string,
-  documentType: string,
+  documentType: DocumentType,
 ) {
   const { data: previous } = await supabase
     .from("documents")

@@ -99,6 +99,7 @@ export function MfaPanel() {
       {enrolled ? (
         <div className="grid gap-3">
           {/* The auth service returns an SVG of the setup key. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={enrolled.qr} alt="" className="h-24 w-full rounded-lg border bg-white object-contain" />
           <p className="font-mono text-sm break-all">{enrolled.secret}</p>
           <div className="grid gap-1.5">
