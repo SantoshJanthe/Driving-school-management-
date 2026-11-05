@@ -1,15 +1,18 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 
 import { PageHeader } from "@/components/layout/page-header";
+import { OfficePaymentForm } from "@/components/payments/office-payment-form";
 import { PaymentLedger } from "@/components/payments/payment-ledger";
 import { RazorpayPanel } from "@/components/payments/razorpay-panel";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { requirePermission } from "@/lib/auth/guards";
+import { requireProfile } from "@/lib/auth/guards";
 import { can } from "@/lib/auth/permissions";
 import { env } from "@/lib/env";
 import { listPayableApplicants, listRecentPayments } from "@/lib/queries/payments";
 import { razorpayStatus } from "@/lib/razorpay/server";
+import { kolkataDate } from "@/lib/training/constants";
 
 export const metadata: Metadata = { title: "Payments" };
 
@@ -26,7 +29,10 @@ export default async function PaymentsPage({
 }: {
   searchParams: Promise<{ applicant?: string; razorpay?: string }>;
 }) {
-  const profile = await requirePermission("view_financials");
+  const profile = await requireProfile();
+  if (!can(profile, "view_financials") && !can(profile, "add_payment")) {
+    redirect("/dashboard?denied=add_payment");
+  }
   const params = await searchParams;
   const [applicants, rows] = await Promise.all([listPayableApplicants(), listRecentPayments()]);
   const base = await origin();
@@ -44,6 +50,13 @@ export default async function PaymentsPage({
             delivered.
           </AlertDescription>
         </Alert>
+      ) : null}
+      {can(profile, "add_payment") ? (
+        <OfficePaymentForm
+          applicants={applicants}
+          selectedId={params.applicant}
+          paymentDate={kolkataDate()}
+        />
       ) : null}
       <RazorpayPanel
         status={razorpayStatus()}

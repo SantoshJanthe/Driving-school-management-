@@ -9,7 +9,7 @@ export function PaymentLedger({ rows }: { rows: LedgerRow[] }) {
       <h2 className="text-lg font-semibold">Recorded payments</h2>
       {rows.length === 0 ? (
         <p className="rounded-xl border border-dashed px-4 py-10 text-center text-sm text-muted-foreground">
-          No payments recorded yet. A paid Razorpay link is added here after the webhook runs.
+          No payments recorded yet. Record a cash, UPI, bank, or card payment above.
         </p>
       ) : (
         <div className="overflow-hidden rounded-xl border">

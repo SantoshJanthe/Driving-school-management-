@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 
 import { requirePermission } from "@/lib/auth/guards";
@@ -13,6 +14,71 @@ export type PaymentLinkState = {
   linkId?: string;
   amountLabel?: string;
 };
+
+export type OfficePaymentState = { error?: string; ok?: boolean };
+
+const PAYMENT_MODES = ["cash", "upi", "bank", "card"] as const;
+
+export async function recordOfficePayment(
+  _prev: OfficePaymentState,
+  formData: FormData,
+): Promise<OfficePaymentState> {
+  const profile = await requirePermission("add_payment");
+  const applicantId = String(formData.get("applicant_id") ?? "");
+  const mode = String(formData.get("payment_mode") ?? "");
+  const amountRaw = String(formData.get("amount") ?? "").trim();
+  const paymentDate = String(formData.get("payment_date") ?? "").trim();
+  const receipt = String(formData.get("receipt_number") ?? "").trim();
+  const remarks = String(formData.get("remarks") ?? "").trim();
+
+  if (!applicantId) return { error: "Choose an applicant." };
+  if (!PAYMENT_MODES.includes(mode as (typeof PAYMENT_MODES)[number])) {
+    return { error: "Choose cash, UPI, bank, or card." };
+  }
+  if (!/^\d+(\.\d{1,2})?$/.test(amountRaw)) return { error: "Enter an amount of at least ₹1." };
+  const amount = Number(amountRaw);
+  if (!Number.isFinite(amount) || amount < 1 || amount > 999999.99) {
+    return { error: "Enter an amount of at least ₹1." };
+  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(paymentDate)) return { error: "Choose a payment date." };
+  if (remarks.length > 500) return { error: "Remarks must be 500 characters or fewer." };
+
+  const supabase = await createClient();
+  const { data: applicant, error: applicantError } = await supabase
+    .from("applicants")
+    .select("id, school_id")
+    .eq("id", applicantId)
+    .maybeSingle();
+  if (applicantError || !applicant || applicant.school_id !== profile.school_id) {
+    return { error: "That applicant is not in your school." };
+  }
+
+  const { error } = await supabase.from("payments").insert({
+    school_id: applicant.school_id,
+    applicant_id: applicant.id,
+    amount,
+    payment_date: paymentDate,
+    payment_mode: mode as (typeof PAYMENT_MODES)[number],
+    receipt_number: receipt || null,
+    remarks: remarks || null,
+    recorded_by: profile.id,
+  });
+  if (error) {
+    if (error.code === "23505") return { error: "That receipt number is already used." };
+    if (error.code === "42501" || /row-level security/i.test(error.message)) {
+      return { error: "You don't have permission to record a payment." };
+    }
+    return { error: error.message };
+  }
+
+  revalidatePath("/payments");
+  revalidatePath("/fees");
+  revalidatePath("/reports");
+  revalidatePath(`/applicants/${applicant.id}`);
+  revalidatePath(`/applicants/${applicant.id}/payments`);
+  revalidatePath("/dashboard");
+  return { ok: true };
+}
 
 function rupeesToPaise(raw: string): number | null {
   const value = raw.trim();
