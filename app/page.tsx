@@ -4,12 +4,13 @@ import Link from "next/link";
 import { EnquiryForm } from "@/components/marketing/enquiry-form";
 import { SchoolLogo } from "@/components/layout/school-logo";
 import { Button } from "@/components/ui/button";
+import { env } from "@/lib/env";
 import { parsePackages, type CoursePackage } from "@/lib/school/packages";
 import { createClient } from "@/lib/supabase/server";
 import { formatINR } from "@/lib/format";
 
 export const metadata: Metadata = {
-  title: "Learn to drive",
+  title: { absolute: `Learn to drive · ${env.appName}` },
   description: "Courses, fees, and an enquiry form for the driving school.",
 };
 

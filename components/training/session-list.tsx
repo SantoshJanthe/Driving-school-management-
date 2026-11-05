@@ -27,6 +27,7 @@ export function SessionList({
   staff,
   showApplicant,
   showDate,
+  linkApplicant = true,
 }: {
   rows: SessionRow[];
   returnTo: string;
@@ -35,6 +36,7 @@ export function SessionList({
   staff: StaffOption[];
   showApplicant?: boolean;
   showDate?: boolean;
+  linkApplicant?: boolean;
   applicants?: ApplicantOption[];
 }) {
   if (rows.length === 0) {
@@ -59,12 +61,16 @@ export function SessionList({
           </div>
           <div className="grid gap-1 text-sm">
             {showApplicant ? (
-              <Link
-                href={`/applicants/${row.applicant_id}/training`}
-                className="font-medium hover:underline"
-              >
-                {row.applicant_name ?? "Applicant"}
-              </Link>
+              linkApplicant ? (
+                <Link
+                  href={`/applicants/${row.applicant_id}/training`}
+                  className="font-medium hover:underline"
+                >
+                  {row.applicant_name ?? "Applicant"}
+                </Link>
+              ) : (
+                <p className="font-medium">{row.applicant_name ?? "Applicant"}</p>
+              )
             ) : null}
             <p>
               <span className="font-medium">{row.vehicle_type ?? "Vehicle not set"}</span>

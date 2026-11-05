@@ -18,6 +18,7 @@ export function InstructorToday({ rows }: { rows: SessionRow[] }) {
         isAdmin={false}
         staff={[]}
         showApplicant
+        linkApplicant={false}
       />
     </div>
   );
