@@ -148,6 +148,10 @@ On a server you control, schedule `pg_dump` yourself. Example, once a day at 02:
 
 Do not commit a dump. Restore with `pg_restore` into an empty database, then put document files back separately.
 
+## Uptime
+
+Error reporting stays off while `SENTRY_DSN` and `NEXT_PUBLIC_SENTRY_DSN` are empty. An uptime checker should request `GET /` on the public origin and expect HTTP 200. No uptime service is connected from this app.
+
 ## Document versions
 
 Uploading a file of a type the applicant already has copies the previous file to `<school>/<applicant>/versions/` and archives the old row. The previous bytes stay. Deleting the new row does not delete that copy.
