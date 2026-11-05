@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 import { temporaryPassword } from "@/lib/auth/temporary-password";
 import { requireAdmin } from "@/lib/auth/guards";
@@ -69,4 +70,41 @@ export async function issueStudentLogin(
 
   revalidatePath(`/applicants/${applicant.id}`);
   return { issued: { email, password } };
+}
+
+export async function unlinkStudentLogin(formData: FormData) {
+  const adminProfile = await requireAdmin();
+  const applicantId = String(formData.get("applicant_id") ?? "");
+  const supabase = await createClient();
+  const { data: applicant } = await supabase
+    .from("applicants")
+    .select("id, school_id")
+    .eq("id", applicantId)
+    .maybeSingle();
+  if (!applicant || applicant.school_id !== adminProfile.school_id) {
+    redirect(`/applicants/${applicantId}`);
+  }
+
+  const { data: link } = await supabase
+    .from("student_accounts")
+    .select("profile_id")
+    .eq("applicant_id", applicant.id)
+    .maybeSingle();
+  if (!link) redirect(`/applicants/${applicant.id}?notice=unlinked`);
+
+  const { error } = await supabase.from("student_accounts").delete().eq("applicant_id", applicant.id);
+  if (error) redirect(`/applicants/${applicant.id}`);
+
+  try {
+    const admin = createAdminClient();
+    const removed = await admin.auth.admin.deleteUser(link.profile_id);
+    if (removed.error) {
+      await supabase.from("profiles").update({ is_active: false }).eq("id", link.profile_id);
+    }
+  } catch {
+    await supabase.from("profiles").update({ is_active: false }).eq("id", link.profile_id);
+  }
+
+  revalidatePath(`/applicants/${applicant.id}`);
+  redirect(`/applicants/${applicant.id}?notice=unlinked`);
 }

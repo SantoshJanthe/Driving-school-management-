@@ -6,7 +6,7 @@ import { SubmitButton } from "@/components/auth/submit-button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { issueStudentLogin, type IssueLoginState } from "@/lib/actions/student-login";
+import { issueStudentLogin, unlinkStudentLogin, type IssueLoginState } from "@/lib/actions/student-login";
 
 const initial: IssueLoginState = {};
 
@@ -25,11 +25,22 @@ export function IssueStudentLogin({
     <section className="grid gap-3 rounded-xl border border-black/10 bg-[#fffcf7] p-4">
       <h3 className="text-sm font-semibold">Student login</h3>
       {existingEmail && !state.issued ? (
-        <p className="text-sm text-muted-foreground">
-          A login already exists for{" "}
-          <span className="font-medium text-foreground">{existingEmail}</span>. The password was
-          shown once when it was issued.
-        </p>
+        <div className="grid gap-3">
+          <p className="text-sm text-muted-foreground">
+            A login already exists for{" "}
+            <span className="font-medium text-foreground">{existingEmail}</span>. The password was
+            shown once when it was issued.
+          </p>
+          <form action={unlinkStudentLogin}>
+            <input type="hidden" name="applicant_id" value={applicantId} />
+            <SubmitButton pendingText="Removing…" variant="outline" className="w-fit">
+              Unlink student login
+            </SubmitButton>
+          </form>
+          <p className="text-xs text-muted-foreground">
+            Unlink removes the login. The learner record, fees, and documents stay.
+          </p>
+        </div>
       ) : null}
       {state.issued ? (
         <Alert role="status">

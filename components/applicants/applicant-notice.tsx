@@ -8,6 +8,7 @@ const NOTICES: Record<string, string> = {
   created: "Applicant created.",
   updated: "Changes saved.",
   status: "Status updated.",
+  unlinked: "Student login removed. The learner record is unchanged.",
 };
 
 export function ApplicantNotice() {
