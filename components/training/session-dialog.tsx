@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { saveSession, type SessionFormState } from "@/lib/actions/training";
-import type { ApplicantOption, SessionRow, StaffOption } from "@/lib/queries/training";
+import type { ApplicantOption, SessionRow, StaffOption, VehicleOption } from "@/lib/queries/training";
 import {
   SESSION_STATUSES,
   SESSION_STATUS_LABELS,
@@ -34,12 +34,14 @@ const initial: SessionFormState = {};
 export function SessionDialog({
   applicants,
   staff,
+  vehicles = [],
   returnTo,
   session,
   lockedApplicantId,
 }: {
   applicants?: ApplicantOption[];
   staff: StaffOption[];
+  vehicles?: VehicleOption[];
   returnTo: string;
   session?: SessionRow;
   lockedApplicantId?: string;
@@ -136,7 +138,23 @@ export function SessionDialog({
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="grid gap-1.5">
-              <Label htmlFor="session-vehicle">Vehicle</Label>
+              <Label htmlFor="session-vehicle-id">Vehicle</Label>
+              <select
+                id="session-vehicle-id"
+                name="vehicle_id"
+                className={selectClass}
+                defaultValue={session?.vehicle_id ?? ""}
+              >
+                <option value="">Unassigned</option>
+                {vehicles.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="grid gap-1.5">
+              <Label htmlFor="session-vehicle">Vehicle type</Label>
               <select
                 id="session-vehicle"
                 name="vehicle_type"

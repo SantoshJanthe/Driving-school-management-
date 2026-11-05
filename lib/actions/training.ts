@@ -38,6 +38,7 @@ export async function saveSession(
   const start = blank(formData.get("start_time"));
   const end = blank(formData.get("end_time"));
   const vehicle = blank(formData.get("vehicle_type"));
+  const vehicleId = blank(formData.get("vehicle_id"));
   const instructorId = blank(formData.get("instructor_id"));
   const statusRaw = String(formData.get("status") ?? "scheduled");
   const remarks = blank(formData.get("remarks"));
@@ -76,6 +77,7 @@ export async function saveSession(
     start_time: start,
     end_time: end,
     vehicle_type: vehicle,
+    vehicle_id: vehicleId,
     instructor_id: instructorId,
     status: statusRaw,
     remarks,
@@ -88,13 +90,40 @@ export async function saveSession(
         school_id: applicant.school_id,
         created_by: profile.id,
       });
-  if (error) return { error: permissionMessage(error) };
+  if (error) {
+    if (/already has a lesson/i.test(error.message)) {
+      return { error: "That vehicle already has a lesson at this time." };
+    }
+    return { error: permissionMessage(error) };
+  }
 
   revalidatePath("/training");
   revalidatePath(`/applicants/${applicant.id}/training`);
   revalidatePath(`/applicants/${applicant.id}/history`);
   revalidatePath("/dashboard");
   redirect(`${returnTo}?notice=saved`);
+}
+
+export async function addVehicle(
+  _prev: SessionFormState,
+  formData: FormData,
+): Promise<SessionFormState> {
+  const profile = await requirePermission("manage_training");
+  const name = String(formData.get("name") ?? "").trim();
+  const vehicleType = blank(formData.get("vehicle_type"));
+  if (name.length < 2) return { error: "Enter the vehicle name." };
+  const supabase = await createClient();
+  const { error } = await supabase.from("vehicles").insert({
+    school_id: profile.school_id,
+    name,
+    vehicle_type: vehicleType,
+  });
+  if (error) {
+    if (error.code === "23505") return { error: "That vehicle name is already used." };
+    return { error: permissionMessage(error) };
+  }
+  revalidatePath("/training/week");
+  redirect("/training/week?notice=vehicle");
 }
 
 export async function setSessionStatus(formData: FormData) {

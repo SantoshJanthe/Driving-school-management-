@@ -254,6 +254,7 @@ export type Database = {
           start_time: string | null;
           end_time: string | null;
           vehicle_type: string | null;
+          vehicle_id: string | null;
           instructor_id: string | null;
           status: Database["public"]["Enums"]["session_status"];
           remarks: string | null;
@@ -269,6 +270,7 @@ export type Database = {
           start_time?: string | null;
           end_time?: string | null;
           vehicle_type?: string | null;
+          vehicle_id?: string | null;
           instructor_id?: string | null;
           status?: Database["public"]["Enums"]["session_status"];
           remarks?: string | null;
@@ -284,6 +286,7 @@ export type Database = {
           start_time?: string | null;
           end_time?: string | null;
           vehicle_type?: string | null;
+          vehicle_id?: string | null;
           instructor_id?: string | null;
           status?: Database["public"]["Enums"]["session_status"];
           remarks?: string | null;
@@ -306,7 +309,41 @@ export type Database = {
             referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
+          {
+            foreignKeyName: "training_sessions_vehicle_id_fkey";
+            columns: ["vehicle_id"];
+            isOneToOne: false;
+            referencedRelation: "vehicles";
+            referencedColumns: ["id"];
+          },
         ];
+      };
+      vehicles: {
+        Row: {
+          id: string;
+          school_id: string;
+          name: string;
+          vehicle_type: string | null;
+          is_active: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          school_id: string;
+          name: string;
+          vehicle_type?: string | null;
+          is_active?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          school_id?: string;
+          name?: string;
+          vehicle_type?: string | null;
+          is_active?: boolean;
+          created_at?: string;
+        };
+        Relationships: [];
       };
       payments: {
         Row: {

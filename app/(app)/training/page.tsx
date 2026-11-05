@@ -9,7 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { requirePermission } from "@/lib/auth/guards";
 import { can, isAdmin } from "@/lib/auth/permissions";
-import { listDaySessions, listTrainingApplicants, listTrainingStaff } from "@/lib/queries/training";
+import { listDaySessions, listTrainingApplicants, listTrainingStaff, listVehicles } from "@/lib/queries/training";
 import { formatDate } from "@/lib/format";
 import { isIsoDate, kolkataDate, shiftDate, VEHICLE_TYPES } from "@/lib/training/constants";
 
@@ -48,10 +48,11 @@ export default async function TrainingPage({
   const instructor = query.instructor || undefined;
   const vehicle = query.vehicle || undefined;
   const canManage = can(profile, "manage_training");
-  const [rows, staff, applicants] = await Promise.all([
+  const [rows, staff, applicants, vehicles] = await Promise.all([
     listDaySessions({ date, instructorId: instructor, vehicle }),
     listTrainingStaff(),
     listTrainingApplicants(),
+    listVehicles(),
   ]);
   const completed = rows.filter((row) => row.status === "completed").length;
   const absent = rows.filter((row) => row.status === "absent").length;
@@ -77,9 +78,19 @@ export default async function TrainingPage({
         title="Training"
         description="Sessions for one day, across every applicant."
         actions={
-          canManage ? (
-            <SessionDialog applicants={applicants} staff={staff} returnTo={returnTo} />
-          ) : undefined
+          <>
+            <Button variant="outline" asChild>
+              <Link href={`/training/week?date=${date}`}>Week timetable</Link>
+            </Button>
+            {canManage ? (
+              <SessionDialog
+                applicants={applicants}
+                staff={staff}
+                vehicles={vehicles}
+                returnTo={returnTo}
+              />
+            ) : null}
+          </>
         }
       />
 

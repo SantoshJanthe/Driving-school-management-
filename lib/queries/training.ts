@@ -14,6 +14,8 @@ export type SessionRow = {
   instructor_name: string | null;
   status: SessionStatus;
   remarks: string | null;
+  vehicle_id: string | null;
+  vehicle_name: string | null;
 };
 
 export type StaffOption = { id: string; full_name: string };
@@ -31,11 +33,13 @@ function mapRow(row: {
   start_time: string | null;
   end_time: string | null;
   vehicle_type: string | null;
+  vehicle_id?: string | null;
   instructor_id: string | null;
   status: SessionStatus;
   remarks: string | null;
   applicant: { full_name: string } | { full_name: string }[] | null;
   instructor: { full_name: string } | { full_name: string }[] | null;
+  vehicle?: { name: string } | { name: string }[] | null;
 }): SessionRow {
   return {
     id: row.id,
@@ -49,11 +53,40 @@ function mapRow(row: {
     instructor_name: one(row.instructor)?.full_name ?? null,
     status: row.status,
     remarks: row.remarks,
+    vehicle_id: row.vehicle_id ?? null,
+    vehicle_name: one(row.vehicle)?.name ?? null,
   };
 }
 
 const SESSION_SELECT =
-  "id, applicant_id, session_date, start_time, end_time, vehicle_type, instructor_id, status, remarks, applicant:applicants(full_name), instructor:profiles!training_sessions_instructor_id_fkey(full_name)";
+  "id, applicant_id, session_date, start_time, end_time, vehicle_type, vehicle_id, instructor_id, status, remarks, applicant:applicants(full_name), instructor:profiles!training_sessions_instructor_id_fkey(full_name), vehicle:vehicles(name)";
+
+export type VehicleOption = { id: string; name: string; vehicle_type: string | null };
+
+export async function listVehicles(): Promise<VehicleOption[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("vehicles")
+    .select("id, name, vehicle_type")
+    .eq("is_active", true)
+    .order("name");
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
+export async function listSessionsBetween(from: string, to: string): Promise<SessionRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("training_sessions")
+    .select(SESSION_SELECT)
+    .gte("session_date", from)
+    .lte("session_date", to)
+    .neq("status", "cancelled")
+    .order("session_date")
+    .order("start_time", { ascending: true, nullsFirst: false });
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((row) => mapRow(row as never));
+}
 
 export async function listApplicantSessions(applicantId: string): Promise<SessionRow[]> {
   const supabase = await createClient();

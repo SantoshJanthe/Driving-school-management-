@@ -122,9 +122,15 @@ values (
 )
 on conflict (profile_id) do nothing;
 
+insert into public.vehicles (id, school_id, name, vehicle_type)
+values
+  ('f0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000001', 'Car 1 · MH12', 'LMV'),
+  ('f0000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-000000000001', 'Bike 1 · MH12', 'MCWG')
+on conflict (id) do nothing;
+
 insert into public.training_sessions (
   id, applicant_id, session_date, start_time, end_time, vehicle_type,
-  instructor_id, status, created_by
+  instructor_id, status, created_by, vehicle_id
 )
 values (
   'd0000000-0000-4000-8000-000000000003',
@@ -135,9 +141,10 @@ values (
   'LMV',
   'b0000000-0000-4000-8000-000000000002',
   'scheduled',
-  'b0000000-0000-4000-8000-000000000001'
+  'b0000000-0000-4000-8000-000000000001',
+  'f0000000-0000-4000-8000-000000000001'
 )
-on conflict (id) do nothing;
+on conflict (id) do update set vehicle_id = excluded.vehicle_id;
 
 insert into public.payments (id, applicant_id, amount, payment_date, payment_mode, receipt_number, recorded_by)
 values (
