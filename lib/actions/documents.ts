@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { isDocumentType } from "@/lib/documents/constants";
 import {
+  copyStoredFile,
   matchesDeclaredType,
   maxUploadBytes,
   removeDocumentFile,
@@ -15,6 +16,33 @@ import { requireAdmin, requirePermission, requireProfile } from "@/lib/auth/guar
 import { createClient } from "@/lib/supabase/server";
 
 export type UploadState = { error?: string };
+
+async function keepPreviousVersions(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  schoolId: string,
+  applicantId: string,
+  documentType: string,
+) {
+  const { data: previous } = await supabase
+    .from("documents")
+    .select("id, file_name, storage_path, mime_type")
+    .eq("applicant_id", applicantId)
+    .eq("document_type", documentType)
+    .eq("is_archived", false);
+  for (const doc of previous ?? []) {
+    const versionId = crypto.randomUUID();
+    const versionPath = `${schoolId}/${applicantId}/versions/${versionId}-${sanitizeFileName(doc.file_name)}`;
+    await copyStoredFile(supabase, doc.storage_path, versionPath, doc.mime_type);
+    const { error } = await supabase.rpc("keep_replaced_document", {
+      p_document: doc.id,
+      p_version_path: versionPath,
+    });
+    if (error) {
+      await removeDocumentFile(supabase, versionPath);
+      throw new Error(error.message);
+    }
+  }
+}
 
 function permissionMessage(error: { code?: string; message: string }) {
   if (error.code === "42501" || /row-level security/i.test(error.message)) {
@@ -54,6 +82,7 @@ export async function uploadDocument(_prev: UploadState, formData: FormData): Pr
   const storagePath = `${applicant.school_id}/${applicant.id}/${documentId}-${safeName}`;
 
   try {
+    await keepPreviousVersions(supabase, applicant.school_id, applicant.id, typeRaw);
     await storeDocumentFile(supabase, storagePath, bytes, file.type);
   } catch (error) {
     return { error: error instanceof Error ? error.message : "Could not store the file." };
@@ -128,6 +157,7 @@ export async function uploadStudentDocument(
   const documentId = crypto.randomUUID();
   const storagePath = `${applicant.school_id}/${applicant.id}/${documentId}-${safeName}`;
   try {
+    await keepPreviousVersions(supabase, applicant.school_id, applicant.id, typeRaw);
     await storeDocumentFile(supabase, storagePath, bytes, file.type);
   } catch (error) {
     return { error: error instanceof Error ? error.message : "Could not store the file." };

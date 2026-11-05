@@ -622,6 +622,10 @@ export type Database = {
         Args: { p_school: string };
         Returns: undefined;
       };
+      keep_replaced_document: {
+        Args: { p_document: string; p_version_path: string };
+        Returns: undefined;
+      };
     };
     Enums: {
       user_role: "admin" | "staff" | "student";

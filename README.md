@@ -132,6 +132,24 @@ RAZORPAY_KEY_SECRET=...
 
 Do not paste the secret into chat, and do not commit `.env.local`. Switch to live keys only when you are ready to take real payments.
 
+## Scheduled database backup
+
+A backup was not run from this machine, and this machine is not a cloud scheduler.
+
+On Supabase, open the project, then Database → Backups, and turn on daily backups. Keep at least 30 days. That backup includes the database. It does not include files stored only on the app server under `var/`.
+
+On a server you control, schedule `pg_dump` yourself. Example, once a day at 02:00, writing a private directory and deleting dumps older than 30 days:
+
+```bash
+0 2 * * * pg_dump "$DATABASE_URL" -Fc -f /var/backups/dsm-$(date +\%F).dump && find /var/backups -name 'dsm-*.dump' -mtime +30 -delete
+```
+
+Do not commit a dump. Restore with `pg_restore` into an empty database, then put document files back separately.
+
+## Document versions
+
+Uploading a file of a type the applicant already has copies the previous file to `<school>/<applicant>/versions/` and archives the old row. The previous bytes stay. Deleting the new row does not delete that copy.
+
 ## Restore a backup
 
 An admin can download a spreadsheet as `school-backup.csv` from Reports. The file has a `student` section, a `payment` section, a `session` section, and a `document` section. The document section lists file name, type, size, and upload time. It does not include the file bytes. It is a copy of those rows, not a full database dump. To restore, create the school again and enter the rows from the file, or load the CSV with a database tool into an empty school. Put the document files back into storage separately. Keep the file private. It does not include a full Aadhaar number.

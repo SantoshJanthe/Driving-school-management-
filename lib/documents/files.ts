@@ -139,6 +139,21 @@ export async function removeDocumentFile(supabase: Client, storagePath: string) 
   }
 }
 
+export async function copyStoredFile(
+  supabase: Client,
+  fromPath: string,
+  toPath: string,
+  mime: string,
+) {
+  const opened = await openDocumentFile(supabase, fromPath);
+  if (!opened) throw new Error("Could not read the previous file.");
+  const bytes =
+    opened.kind === "bytes"
+      ? new Uint8Array(opened.bytes)
+      : new Uint8Array(await (await fetch(opened.url)).arrayBuffer());
+  await storeDocumentFile(supabase, toPath, bytes, mime);
+}
+
 export async function openDocumentFile(
   supabase: Client,
   storagePath: string,
