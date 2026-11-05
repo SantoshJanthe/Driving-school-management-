@@ -60,12 +60,19 @@ export function SchoolForm({
         <h2 className="text-sm font-semibold tracking-wide uppercase">Branch</h2>
         <div className="grid gap-4 md:grid-cols-2">
           <div className="grid gap-1.5 md:col-span-2">
-            <Label htmlFor="school-name">School name</Label>
+            <Label htmlFor="school-name">Display name</Label>
             <Input id="school-name" name="name" required defaultValue={name} className="h-11" />
+            <p className="text-xs text-muted-foreground">
+              Shown on the public page. The product title stays MOTOR DRIVING SCHOOL SOFTWARE.
+            </p>
           </div>
           <div className="grid gap-1.5 md:col-span-2">
             <Label htmlFor="school-address">Address</Label>
             <Textarea id="school-address" name="address" rows={3} defaultValue={address} />
+          </div>
+          <div className="grid gap-1.5 md:col-span-2">
+            <Label htmlFor="school-logo">Logo</Label>
+            <Input id="school-logo" name="logo" type="file" accept="image/png,image/jpeg,image/webp" />
           </div>
           <div className="grid gap-1.5">
             <Label htmlFor="school-phone">Phone</Label>

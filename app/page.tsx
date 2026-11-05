@@ -19,6 +19,7 @@ type PublicSchool = {
   phone: string | null;
   email: string | null;
   packages: CoursePackage[];
+  hasLogo: boolean;
 };
 
 async function loadSchool(): Promise<PublicSchool> {
@@ -28,6 +29,7 @@ async function loadSchool(): Promise<PublicSchool> {
     phone: null,
     email: null,
     packages: parsePackages(null),
+    hasLogo: false,
   };
   try {
     const supabase = await createClient();
@@ -40,6 +42,7 @@ async function loadSchool(): Promise<PublicSchool> {
       phone: typeof row.phone === "string" ? row.phone : null,
       email: typeof row.email === "string" ? row.email : null,
       packages: parsePackages({ packages: row.packages as never }),
+      hasLogo: row.has_logo === true,
     };
   } catch {
     return fallback;
@@ -58,8 +61,20 @@ export default async function HomePage({
     <div className="page-enter mx-auto flex min-h-dvh w-full max-w-5xl flex-col gap-16 px-4 py-8 md:px-8 md:py-12">
       <header className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <SchoolLogo className="size-10 rounded-xl" />
-          <p className="text-sm font-medium tracking-tight">{school.name}</p>
+          {school.hasLogo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src="/api/branding/logo" alt="" className="size-10 rounded-xl object-cover" />
+          ) : (
+            <SchoolLogo className="size-10 rounded-xl" />
+          )}
+          <div>
+            <p className="text-sm font-medium tracking-tight">{school.name}</p>
+            {school.phone ? (
+              <a className="text-xs text-muted-foreground" href={`tel:${school.phone}`}>
+                {school.phone}
+              </a>
+            ) : null}
+          </div>
         </div>
         <nav className="flex items-center gap-4 text-sm">
           <a className="hidden underline-offset-4 hover:underline sm:inline" href="#courses">

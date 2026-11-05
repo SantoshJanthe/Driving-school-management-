@@ -557,6 +557,10 @@ export type Database = {
         Args: Record<string, never>;
         Returns: Json;
       };
+      school_logo_path: {
+        Args: Record<string, never>;
+        Returns: string;
+      };
       submit_enquiry: {
         Args: {
           p_full_name: string;
