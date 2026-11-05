@@ -2,7 +2,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { DOCUMENT_TYPE_LABELS } from "@/lib/documents/constants";
 import { formatDate, formatINR } from "@/lib/format";
 import type { StudentHome } from "@/lib/queries/student-home";
-import { SESSION_STATUS_LABELS } from "@/lib/training/constants";
+import { ATTENDANCE_LABELS, SESSION_STATUS_LABELS } from "@/lib/training/constants";
 
 function clock(value: string | null) {
   if (!value) return "";
@@ -67,6 +67,7 @@ export function StudentHomeView({ home }: { home: StudentHome | null }) {
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {SESSION_STATUS_LABELS[session.status]}
+                  {session.attendance ? ` · ${ATTENDANCE_LABELS[session.attendance]}` : " · Attendance not marked"}
                   {session.vehicle_type ? ` · ${session.vehicle_type}` : ""}
                   {session.instructor_name ? ` · ${session.instructor_name}` : ""}
                 </p>

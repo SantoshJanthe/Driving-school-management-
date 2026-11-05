@@ -1,18 +1,21 @@
 import { Check, RotateCcw, X } from "lucide-react";
 
-import { deleteSession, setSessionStatus } from "@/lib/actions/training";
+import { deleteSession, markAttendance, setSessionStatus } from "@/lib/actions/training";
 import { Button } from "@/components/ui/button";
-import type { SessionStatus } from "@/lib/training/constants";
+import type { AttendanceMark, SessionStatus } from "@/lib/training/constants";
+import { ATTENDANCE_LABELS } from "@/lib/training/constants";
 
 export function SessionActions({
   id,
   status,
+  attendance,
   returnTo,
   canManage,
   isAdmin,
 }: {
   id: string;
   status: SessionStatus;
+  attendance?: AttendanceMark | null;
   returnTo: string;
   canManage: boolean;
   isAdmin: boolean;
@@ -35,6 +38,23 @@ export function SessionActions({
           Undo
         </StatusButton>
       ) : null}
+      {canManage
+        ? (["present", "absent", "late"] as const).map((mark) => (
+            <form key={mark} action={markAttendance}>
+              <input type="hidden" name="id" value={id} />
+              <input type="hidden" name="attendance" value={mark} />
+              <input type="hidden" name="return_to" value={returnTo} />
+              <Button
+                type="submit"
+                variant={attendance === mark ? "default" : "outline"}
+                size="sm"
+                className="h-11"
+              >
+                {ATTENDANCE_LABELS[mark]}
+              </Button>
+            </form>
+          ))
+        : null}
       {isAdmin ? (
         <form action={deleteSession}>
           <input type="hidden" name="id" value={id} />

@@ -94,6 +94,7 @@ export function SessionList({
               returnTo={returnTo}
               canManage={canManage}
               isAdmin={isAdmin}
+              attendance={row.attendance}
             />
           </div>
         </li>

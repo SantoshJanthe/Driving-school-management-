@@ -11,6 +11,17 @@ export const SESSION_STATUS_LABELS: Record<SessionStatus, string> = {
 
 export const VEHICLE_TYPES = ["LMV", "MCWG", "MCWOG", "HMV", "LMV+MCWG"] as const;
 
+export const ATTENDANCE_MARKS = ["present", "absent", "late"] as const;
+export type AttendanceMark = (typeof ATTENDANCE_MARKS)[number];
+export const ATTENDANCE_LABELS: Record<AttendanceMark, string> = {
+  present: "Present",
+  absent: "Absent",
+  late: "Late",
+};
+export function isAttendanceMark(value: string): value is AttendanceMark {
+  return (ATTENDANCE_MARKS as readonly string[]).includes(value);
+}
+
 export function isSessionStatus(value: string): value is SessionStatus {
   return (SESSION_STATUSES as readonly string[]).includes(value);
 }

@@ -1,7 +1,7 @@
 import { APPLICATION_STATUS_LABELS, type ApplicationStatus } from "@/lib/applicants/labels";
 import type { DocumentType } from "@/lib/documents/constants";
 import { createClient } from "@/lib/supabase/server";
-import type { SessionStatus } from "@/lib/training/constants";
+import type { AttendanceMark, SessionStatus } from "@/lib/training/constants";
 
 export type StudentSession = {
   id: string;
@@ -10,6 +10,7 @@ export type StudentSession = {
   end_time: string | null;
   vehicle_type: string | null;
   status: SessionStatus;
+  attendance: AttendanceMark | null;
   remarks: string | null;
   instructor_name: string | null;
 };
@@ -63,7 +64,7 @@ export async function getStudentHome(): Promise<StudentHome | null> {
     supabase
       .from("training_sessions")
       .select(
-        "id, session_date, start_time, end_time, vehicle_type, status, remarks, instructor:profiles!training_sessions_instructor_id_fkey(full_name)",
+          "id, session_date, start_time, end_time, vehicle_type, status, attendance, remarks, instructor:profiles!training_sessions_instructor_id_fkey(full_name)",
       )
       .eq("applicant_id", link.applicant_id)
       .order("session_date", { ascending: false })
@@ -96,6 +97,7 @@ export async function getStudentHome(): Promise<StudentHome | null> {
       end_time: row.end_time,
       vehicle_type: row.vehicle_type,
       status: row.status,
+      attendance: row.attendance,
       remarks: row.remarks,
       instructor_name: one(row.instructor)?.full_name ?? null,
     })),

@@ -257,6 +257,7 @@ export type Database = {
           vehicle_id: string | null;
           instructor_id: string | null;
           status: Database["public"]["Enums"]["session_status"];
+          attendance: Database["public"]["Enums"]["attendance_mark"] | null;
           remarks: string | null;
           created_by: string | null;
           created_at: string;
@@ -273,6 +274,7 @@ export type Database = {
           vehicle_id?: string | null;
           instructor_id?: string | null;
           status?: Database["public"]["Enums"]["session_status"];
+          attendance?: Database["public"]["Enums"]["attendance_mark"] | null;
           remarks?: string | null;
           created_by?: string | null;
           created_at?: string;
@@ -289,6 +291,7 @@ export type Database = {
           vehicle_id?: string | null;
           instructor_id?: string | null;
           status?: Database["public"]["Enums"]["session_status"];
+          attendance?: Database["public"]["Enums"]["attendance_mark"] | null;
           remarks?: string | null;
           created_by?: string | null;
           created_at?: string;
@@ -582,6 +585,7 @@ export type Database = {
         | "closed";
       training_status: "not_started" | "in_progress" | "completed" | "discontinued";
       session_status: "scheduled" | "completed" | "absent" | "cancelled";
+      attendance_mark: "present" | "absent" | "late";
       payment_mode: "cash" | "upi" | "bank" | "card";
       document_type: "application_form" | "receipt" | "sarathi_pdf" | "id_proof" | "other";
       activity_action:

@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 
 import { requireAdmin, requirePermission } from "@/lib/auth/guards";
 import { createClient } from "@/lib/supabase/server";
-import { isSessionStatus, VEHICLE_TYPES } from "@/lib/training/constants";
+import { isAttendanceMark, isSessionStatus, VEHICLE_TYPES } from "@/lib/training/constants";
 
 export type SessionFormState = { error?: string };
 
@@ -144,6 +144,27 @@ export async function setSessionStatus(formData: FormData) {
     revalidatePath("/training");
     revalidatePath(`/applicants/${existing.applicant_id}/training`);
     revalidatePath(`/applicants/${existing.applicant_id}/history`);
+    revalidatePath("/dashboard");
+  }
+  redirect(`${returnTo}?notice=${error ? "denied" : "status"}`);
+}
+
+export async function markAttendance(formData: FormData) {
+  await requirePermission("manage_training");
+  const id = String(formData.get("id") ?? "");
+  const attendance = String(formData.get("attendance") ?? "");
+  const returnTo = safeReturn(String(formData.get("return_to") ?? ""), "/training");
+  if (!id || !isAttendanceMark(attendance)) redirect(returnTo);
+  const supabase = await createClient();
+  const { data: existing } = await supabase
+    .from("training_sessions")
+    .select("applicant_id")
+    .eq("id", id)
+    .maybeSingle();
+  const { error } = await supabase.from("training_sessions").update({ attendance }).eq("id", id);
+  if (!error && existing) {
+    revalidatePath("/training");
+    revalidatePath(`/applicants/${existing.applicant_id}/training`);
     revalidatePath("/dashboard");
   }
   redirect(`${returnTo}?notice=${error ? "denied" : "status"}`);

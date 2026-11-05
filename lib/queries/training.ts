@@ -1,6 +1,6 @@
 import { sessionTargetFor } from "@/lib/school/packages";
 import { createClient } from "@/lib/supabase/server";
-import type { SessionStatus } from "@/lib/training/constants";
+import type { AttendanceMark, SessionStatus } from "@/lib/training/constants";
 
 export type SessionRow = {
   id: string;
@@ -13,6 +13,7 @@ export type SessionRow = {
   instructor_id: string | null;
   instructor_name: string | null;
   status: SessionStatus;
+  attendance: AttendanceMark | null;
   remarks: string | null;
   vehicle_id: string | null;
   vehicle_name: string | null;
@@ -36,6 +37,7 @@ function mapRow(row: {
   vehicle_id?: string | null;
   instructor_id: string | null;
   status: SessionStatus;
+  attendance?: AttendanceMark | null;
   remarks: string | null;
   applicant: { full_name: string } | { full_name: string }[] | null;
   instructor: { full_name: string } | { full_name: string }[] | null;
@@ -52,6 +54,7 @@ function mapRow(row: {
     instructor_id: row.instructor_id,
     instructor_name: one(row.instructor)?.full_name ?? null,
     status: row.status,
+    attendance: row.attendance ?? null,
     remarks: row.remarks,
     vehicle_id: row.vehicle_id ?? null,
     vehicle_name: one(row.vehicle)?.name ?? null,
@@ -59,7 +62,7 @@ function mapRow(row: {
 }
 
 const SESSION_SELECT =
-  "id, applicant_id, session_date, start_time, end_time, vehicle_type, vehicle_id, instructor_id, status, remarks, applicant:applicants(full_name), instructor:profiles!training_sessions_instructor_id_fkey(full_name), vehicle:vehicles(name)";
+  "id, applicant_id, session_date, start_time, end_time, vehicle_type, vehicle_id, instructor_id, status, attendance, remarks, applicant:applicants(full_name), instructor:profiles!training_sessions_instructor_id_fkey(full_name), vehicle:vehicles(name)";
 
 export type VehicleOption = { id: string; name: string; vehicle_type: string | null };
 
