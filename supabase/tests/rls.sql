@@ -223,6 +223,10 @@ do $$ begin
   perform public.submit_enquiry('Website Learner', '+91 99887 76655', '', 'lmv', 'Evenings please');
   raise notice 'PASS enquiry accepted';
 end $$;
+do $$ begin
+  perform public.submit_enquiry('No Course Learner', '9988776654', '', '', 'Call me');
+  raise notice 'PASS enquiry without a course accepted';
+end $$;
 reset role;
 select pg_temp.check('enquiry stored as applicant',
   (select application_status = 'enquiry'

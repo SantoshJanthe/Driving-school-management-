@@ -8,19 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { submitEnquiry, type EnquiryState } from "@/lib/actions/enquiry";
-import type { CoursePackage } from "@/lib/school/packages";
 
 const initial: EnquiryState = {};
 
-export function EnquiryForm({
-  packages,
-  selected,
-  schoolId,
-}: {
-  packages: CoursePackage[];
-  selected?: string;
-  schoolId?: string;
-}) {
+export function EnquiryForm({ schoolId }: { schoolId?: string }) {
   const [state, action] = useActionState(submitEnquiry, initial);
 
   if (state.ok) {
@@ -68,26 +59,6 @@ export function EnquiryForm({
             className="h-11"
           />
         </div>
-      </div>
-      <div className="grid gap-1.5">
-        <Label htmlFor="enquiry-package">Course</Label>
-        <select
-          id="enquiry-package"
-          name="package_code"
-          required
-          defaultValue={
-            selected && packages.some((item) => item.code === selected)
-              ? selected
-              : packages[0]?.code
-          }
-          className="h-11 w-full rounded-lg border border-input bg-background px-2.5 text-base md:text-sm"
-        >
-          {packages.map((item) => (
-            <option key={item.code} value={item.code}>
-              {item.name}
-            </option>
-          ))}
-        </select>
       </div>
       <div className="grid gap-1.5">
         <Label htmlFor="enquiry-message">Message</Label>

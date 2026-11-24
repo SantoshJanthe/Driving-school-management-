@@ -6,7 +6,6 @@ import { TopographyBackground } from "@/components/marketing/topography-backgrou
 import { SchoolLogo } from "@/components/layout/school-logo";
 import { Button } from "@/components/ui/button";
 import { env } from "@/lib/env";
-import { parsePackages, type CoursePackage } from "@/lib/school/packages";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -16,24 +15,12 @@ export const metadata: Metadata = {
 };
 
 type PublicSchool = {
-  id: string | null;
-  name: string;
-  address: string | null;
-  phone: string | null;
-  email: string | null;
-  packages: CoursePackage[];
   hasLogo: boolean;
 };
 
 type PublicChoice = { id: string; name: string };
 
 const fallbackSchool: PublicSchool = {
-  id: null,
-  name: "Driving school",
-  address: null,
-  phone: null,
-  email: null,
-  packages: parsePackages(null),
   hasLogo: false,
 };
 
@@ -60,12 +47,6 @@ async function loadSchool(schoolId: string | null): Promise<PublicSchool> {
     if (error || !data || typeof data !== "object" || Array.isArray(data)) return fallbackSchool;
     const row = data as Record<string, unknown>;
     return {
-      id: schoolId,
-      name: typeof row.name === "string" && row.name ? row.name : fallbackSchool.name,
-      address: typeof row.address === "string" ? row.address : null,
-      phone: typeof row.phone === "string" ? row.phone : null,
-      email: typeof row.email === "string" ? row.email : null,
-      packages: parsePackages({ packages: row.packages as never }),
       hasLogo: row.has_logo === true,
     };
   } catch {
@@ -76,9 +57,9 @@ async function loadSchool(schoolId: string | null): Promise<PublicSchool> {
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: Promise<{ course?: string; school?: string }>;
+  searchParams: Promise<{ school?: string }>;
 }) {
-  const { course, school: requestedSchool } = await searchParams;
+  const { school: requestedSchool } = await searchParams;
   const choices = await loadChoices();
   const selected = choices.find((item) => item.id === requestedSchool) ?? choices[0] ?? null;
   const school = await loadSchool(selected?.id ?? null);
@@ -205,33 +186,15 @@ export default async function HomePage({
         </ol>
       </section>
 
-      <section className="grid gap-8 md:grid-cols-2" aria-labelledby="contact-heading">
-        <div className="grid gap-3">
-          <h2 id="contact-heading" className="text-2xl font-medium tracking-tight">
-            Selected school
-          </h2>
-          <p className="text-sm font-medium">{school.name}</p>
-          <p className="text-sm">{school.address ?? "Address not set yet."}</p>
-          {school.phone ? (
-            <a className="text-sm underline-offset-4 hover:underline" href={`tel:${school.phone}`}>
-              {school.phone}
-            </a>
-          ) : null}
-          {school.email ? (
-            <a
-              className="text-sm underline-offset-4 hover:underline"
-              href={`mailto:${school.email}`}
-            >
-              {school.email}
-            </a>
-          ) : null}
-        </div>
+      <section className="max-w-xl" aria-labelledby="enquire-heading">
         <div className="rounded-2xl border border-black/10 bg-[#fffcf7] p-5 shadow-[0_18px_50px_rgba(26,25,22,0.05)]">
-          <h2 className="mb-1 text-lg font-medium">Send an enquiry</h2>
+          <h2 id="enquire-heading" className="mb-1 text-lg font-medium">
+            Send an enquiry
+          </h2>
           <p className="mb-4 text-sm text-muted-foreground">
-            This reaches {school.name} as a learner enquiry. It does not start a software subscription.
+            Leave your name and mobile number. The school office will call you back about joining.
           </p>
-          <EnquiryForm packages={school.packages} selected={course} schoolId={selected?.id} />
+          <EnquiryForm schoolId={selected?.id} />
         </div>
       </section>
       </div>
