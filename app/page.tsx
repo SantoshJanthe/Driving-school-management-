@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { env } from "@/lib/env";
 import { parsePackages, type CoursePackage } from "@/lib/school/packages";
 import { createClient } from "@/lib/supabase/server";
-import { formatINR } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: { absolute: env.appName },
@@ -83,7 +82,6 @@ export default async function HomePage({
   const choices = await loadChoices();
   const selected = choices.find((item) => item.id === requestedSchool) ?? choices[0] ?? null;
   const school = await loadSchool(selected?.id ?? null);
-  const schoolQuery = selected ? `school=${selected.id}&` : "";
 
   return (
     <div className="relative min-h-dvh overflow-hidden">
@@ -158,36 +156,6 @@ export default async function HomePage({
           Applicants, training, fees, documents, and staff stay with the school that owns them.
           A learner can still send an enquiry to the branch you select below.
         </p>
-      </section>
-
-      <section id="courses" className="grid gap-4" aria-labelledby="courses-heading">
-        <h2 id="courses-heading" className="text-2xl font-medium tracking-tight">
-          Courses this school has entered
-        </h2>
-        <p className="max-w-xl text-sm text-muted-foreground">
-          These fees belong to {school.name}. They are not a price for the software.
-        </p>
-        <ul className="grid gap-4 md:grid-cols-3">
-          {school.packages.map((item) => (
-            <li
-              key={item.code}
-              className="flex flex-col gap-3 rounded-2xl border border-black/10 bg-[#fffcf7] p-5 shadow-[0_18px_50px_rgba(26,25,22,0.05)]"
-            >
-              <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                {item.code}
-              </p>
-              <h3 className="text-lg font-medium">{item.name}</h3>
-              <p className="text-sm text-muted-foreground">{item.summary}</p>
-              <p className="text-2xl font-medium">{formatINR(item.fee)}</p>
-              <p className="text-xs text-muted-foreground">{item.sessions} sessions included</p>
-              <Button asChild variant="outline" className="mt-auto h-11">
-                <Link href={`/?${schoolQuery}course=${item.code}#enquire`}>
-                  Send an enquiry to this school
-                </Link>
-              </Button>
-            </li>
-          ))}
-        </ul>
       </section>
 
       <section id="office" className="grid gap-6 md:grid-cols-2" aria-labelledby="why-heading">

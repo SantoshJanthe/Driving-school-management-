@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { PageHeader } from "@/components/layout/page-header";
 import { MfaPanel } from "@/components/settings/mfa-panel";
@@ -26,7 +27,7 @@ export default async function SettingsPage() {
         description={
           limited
             ? "Change your own password."
-            : "Branch contact, courses, and your own password."
+            : "Branch contact and your own password."
         }
       />
       <PasswordForm />
@@ -38,8 +39,14 @@ export default async function SettingsPage() {
             address={school.address ?? ""}
             phone={school.contact_phone ?? ""}
             email={school.email ?? ""}
-            packages={packages}
           />
+          <p className="text-sm text-muted-foreground">
+            Course names, fees, and session counts are edited on the{" "}
+            <Link href="/courses" className="underline underline-offset-4">
+              Courses
+            </Link>{" "}
+            page.
+          </p>
         ) : (
           <div className="grid gap-6">
             <section className="grid gap-2">

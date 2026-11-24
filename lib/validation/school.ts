@@ -16,6 +16,24 @@ const course = z.object({
   summary: z.string().trim().max(200, "Keep the summary under 200 characters"),
 });
 
+export const courseListSchema = z
+  .array(course)
+  .min(1, "Add at least one course")
+  .max(8, "Keep the list to 8 courses")
+  .superRefine((packages, ctx) => {
+    const seen = new Set<string>();
+    packages.forEach((item, index) => {
+      if (seen.has(item.code)) {
+        ctx.addIssue({
+          code: "custom",
+          path: [index, "code"],
+          message: "Course codes must be unique",
+        });
+      }
+      seen.add(item.code);
+    });
+  });
+
 export const schoolSettingsSchema = z.object({
   name: z.string().trim().min(2, "Enter the school name").max(120, "Name is too long"),
   address: z.string().trim().max(300, "Address is too long"),
@@ -33,23 +51,7 @@ export const schoolSettingsSchema = z.object({
       (value) => value === "" || z.string().email().safeParse(value).success,
       "Enter a valid email",
     ),
-  packages: z
-    .array(course)
-    .min(1, "Add at least one course")
-    .max(8, "Keep the list to 8 courses")
-    .superRefine((packages, ctx) => {
-      const seen = new Set<string>();
-      packages.forEach((item, index) => {
-        if (seen.has(item.code)) {
-          ctx.addIssue({
-            code: "custom",
-            path: [index, "code"],
-            message: "Course codes must be unique",
-          });
-        }
-        seen.add(item.code);
-      });
-    }),
+  packages: courseListSchema.optional(),
 });
 
 export type SchoolSettingsInput = z.infer<typeof schoolSettingsSchema>;
