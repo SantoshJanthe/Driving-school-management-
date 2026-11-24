@@ -3,6 +3,7 @@ import type { EmailOtpType } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 import { safeNextPath } from "@/lib/validation/auth";
+import { visitorOrigin } from "@/lib/visitor-origin";
 
 /**
  * Landing point for links in Supabase Auth emails (password recovery, staff
@@ -10,7 +11,8 @@ import { safeNextPath } from "@/lib/validation/auth";
  * user on to `next` (defaults to /reset-password for recovery/invite flows).
  */
 export async function GET(request: NextRequest) {
-  const { searchParams, origin } = request.nextUrl;
+  const { searchParams } = request.nextUrl;
+  const origin = visitorOrigin(request.headers) ?? request.nextUrl.origin;
   const code = searchParams.get("code");
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;

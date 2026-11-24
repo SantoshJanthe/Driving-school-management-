@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
+import { visitorOrigin } from "@/lib/visitor-origin";
 
 const REASONS = new Set(["deactivated", "no_profile", "expired"]);
 
@@ -14,7 +15,7 @@ export async function GET(request: NextRequest) {
   await supabase.auth.signOut();
 
   const reason = request.nextUrl.searchParams.get("reason");
-  const url = new URL("/login", request.nextUrl.origin);
+  const url = new URL("/login", visitorOrigin(request.headers) ?? request.nextUrl.origin);
   if (reason && REASONS.has(reason)) url.searchParams.set("error", reason);
   return NextResponse.redirect(url);
 }

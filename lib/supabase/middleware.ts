@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import type { Database } from "@/lib/database.types";
 import { env } from "@/lib/env";
+import { visitorUrl } from "@/lib/visitor-origin";
 
 /**
  * Routes reachable without a session. `/` is the public school page.
@@ -72,33 +73,22 @@ export async function updateSession(request: NextRequest) {
   if (user && pathname !== "/login/mfa") {
     const { data: assurance } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
     if (assurance?.nextLevel === "aal2" && assurance.currentLevel !== "aal2") {
-      const url = request.nextUrl.clone();
-      url.pathname = "/login/mfa";
-      url.search = "";
-      return NextResponse.redirect(url);
+      return NextResponse.redirect(visitorUrl(request.headers, "/login/mfa", request.nextUrl.origin));
     }
   }
 
   if (pathname === "/" && user) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
-    url.search = "";
-    return NextResponse.redirect(url);
+    return NextResponse.redirect(visitorUrl(request.headers, "/dashboard", request.nextUrl.origin));
   }
 
   if (!user && !matches(pathname, PUBLIC_PATHS)) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    url.search = "";
-    if (pathname !== "/dashboard") url.searchParams.set("next", `${pathname}${search}`);
-    return NextResponse.redirect(url);
+    const login = visitorUrl(request.headers, "/login", request.nextUrl.origin);
+    if (pathname !== "/dashboard") login.searchParams.set("next", `${pathname}${search}`);
+    return NextResponse.redirect(login);
   }
 
   if (user && pathname !== "/login/mfa" && matches(pathname, AUTH_ONLY_PATHS)) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
-    url.search = "";
-    return NextResponse.redirect(url);
+    return NextResponse.redirect(visitorUrl(request.headers, "/dashboard", request.nextUrl.origin));
   }
 
   return response;
