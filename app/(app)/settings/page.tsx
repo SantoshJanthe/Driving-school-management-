@@ -31,14 +31,16 @@ export default async function SettingsPage() {
       <PageHeader
         title="Settings"
         description={
-          limited
-            ? "Change your own password."
-            : "Branch contact and your own password."
+          limited ? "Change your own password." : "Branch contact and your own password."
         }
       />
       {owner ? (
         <p className="rounded-2xl border border-black/10 bg-[#fffcf7] p-4 text-sm">
-          You can verify software subscription payments.{" "}
+          You can open every school and verify software subscription payments.{" "}
+          <Link href="/vendor/schools" className="underline underline-offset-4">
+            Open schools
+          </Link>
+          {" · "}
           <Link href="/vendor/subscriptions" className="underline underline-offset-4">
             Open subscription payments
           </Link>

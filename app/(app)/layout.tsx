@@ -6,6 +6,7 @@ import { PermissionProvider } from "@/components/providers/permission-provider";
 import { requireProfile } from "@/lib/auth/guards";
 import { isInstructorOnly } from "@/lib/auth/permissions";
 import { env } from "@/lib/env";
+import { isPlatformOwner } from "@/lib/subscription/config";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -28,6 +29,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
 
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   const { data: school } = await supabase
     .from("schools")
     .select("name")
@@ -35,7 +39,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .maybeSingle();
 
   return (
-    <PermissionProvider profile={profile}>
+    <PermissionProvider profile={profile} platformOwner={isPlatformOwner(user?.email)}>
       <AppShell schoolName={school?.name ?? env.appName}>{children}</AppShell>
     </PermissionProvider>
   );

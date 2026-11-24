@@ -5,7 +5,7 @@ import { createContext, useContext } from "react";
 import type { Profile } from "@/lib/auth/get-profile";
 import { can, isAdmin, type Permission } from "@/lib/auth/permissions";
 
-const PermissionContext = createContext<Profile | null>(null);
+const PermissionContext = createContext<{ profile: Profile; platformOwner: boolean } | null>(null);
 
 /**
  * Makes the signed-in profile (role + permission toggles) available to client
@@ -14,20 +14,30 @@ const PermissionContext = createContext<Profile | null>(null);
  */
 export function PermissionProvider({
   profile,
+  platformOwner = false,
   children,
 }: {
   profile: Profile;
+  platformOwner?: boolean;
   children: React.ReactNode;
 }) {
-  return <PermissionContext.Provider value={profile}>{children}</PermissionContext.Provider>;
+  return (
+    <PermissionContext.Provider value={{ profile, platformOwner }}>
+      {children}
+    </PermissionContext.Provider>
+  );
 }
 
 export function useProfile(): Profile {
-  const profile = useContext(PermissionContext);
-  if (!profile) {
+  const value = useContext(PermissionContext);
+  if (!value) {
     throw new Error("useProfile must be used inside <PermissionProvider>");
   }
-  return profile;
+  return value.profile;
+}
+
+export function usePlatformOwner(): boolean {
+  return useContext(PermissionContext)?.platformOwner ?? false;
 }
 
 export function useCan(key: Permission): boolean {

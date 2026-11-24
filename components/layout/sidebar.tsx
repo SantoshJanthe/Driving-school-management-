@@ -4,13 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { isActivePath, visibleNavItems } from "@/components/layout/nav-items";
-import { useProfile } from "@/components/providers/permission-provider";
+import { usePlatformOwner, useProfile } from "@/components/providers/permission-provider";
 import { cn } from "@/lib/utils";
 
 export function Sidebar({ schoolName }: { schoolName: string }) {
   const pathname = usePathname();
   const profile = useProfile();
-  const items = visibleNavItems(profile);
+  const items = visibleNavItems(profile, { platformOwner: usePlatformOwner() });
 
   return (
     <aside className="sticky top-16 hidden h-[calc(100dvh-4rem)] w-64 shrink-0 flex-col border-r border-[rgba(26,25,22,0.08)] bg-[#fffcf7]/55 px-3 py-6 backdrop-blur-md lg:flex">

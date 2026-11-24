@@ -788,6 +788,18 @@ export type Database = {
         Args: { p_school: string };
         Returns: undefined;
       };
+      provision_login: {
+        Args: { p_email: string; p_password: string; p_user_metadata: Json };
+        Returns: string;
+      };
+      set_login_password: {
+        Args: { p_user: string; p_password: string };
+        Returns: undefined;
+      };
+      delete_login: {
+        Args: { p_user: string };
+        Returns: undefined;
+      };
       keep_replaced_document: {
         Args: { p_document: string; p_version_path: string };
         Returns: undefined;

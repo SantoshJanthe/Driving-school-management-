@@ -143,6 +143,8 @@ The landing page sells the software as a monthly subscription per school. The ow
 
 The landing page shows only the methods that are switched on and fully set up; with none, it says the fee is not published yet. Payment rows live in `public.subscription_requests` and the method choice in `public.platform_settings`. RLS is on for both with no policies; only the server reads them with the service role.
 
+Emails in `PLATFORM_OWNER_EMAILS` can open **Schools** (`/vendor/schools`): every school, its software-access payment records, and a form to set that school admin's password.
+
 ## Apps for laptop and phone
 
 - **Laptop, iPhone, any browser:** the signed-in app is an installable web app (`app/manifest.ts`, `public/sw.js`). It opens at `/dashboard`. Chrome and Edge show an install button; on iPhone use Share → Add to Home Screen.

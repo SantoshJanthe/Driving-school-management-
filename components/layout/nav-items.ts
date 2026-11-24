@@ -11,9 +11,16 @@ import {
   Settings,
   UserCog,
   Users,
+  Wallet,
 } from "lucide-react";
 
-import { can, isAdmin, isInstructorOnly, type Permission, type PermissionSubject } from "@/lib/auth/permissions";
+import {
+  can,
+  isAdmin,
+  isInstructorOnly,
+  type Permission,
+  type PermissionSubject,
+} from "@/lib/auth/permissions";
 
 export type NavItem = {
   href: string;
@@ -22,6 +29,8 @@ export type NavItem = {
   /** Staff need this permission to see the item; admins always see it. */
   permission?: Permission;
   adminOnly?: boolean;
+  /** Software owner listed in PLATFORM_OWNER_EMAILS. */
+  platformOwnerOnly?: boolean;
 };
 
 /** The eight sections from the spec, in sidebar order. */
@@ -38,12 +47,17 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/activity-logs", label: "Logs", icon: ScrollText, adminOnly: true },
   { href: "/settings", label: "Settings", icon: Settings },
   { href: "/schools/new", label: "New school", icon: Building2, adminOnly: true },
+  { href: "/vendor/schools", label: "Schools", icon: Building2, platformOwnerOnly: true },
+  { href: "/vendor/subscriptions", label: "Subscriptions", icon: Wallet, platformOwnerOnly: true },
 ];
 
 /** Items shown in the mobile bottom bar before the "More" sheet, in priority order. */
 export const MOBILE_PRIMARY_HREFS = ["/dashboard", "/applicants", "/training", "/payments"];
 
-export function visibleNavItems(subject: PermissionSubject): NavItem[] {
+export function visibleNavItems(
+  subject: PermissionSubject,
+  extras?: { platformOwner?: boolean },
+): NavItem[] {
   if (subject.role === "student") {
     return [{ href: "/dashboard", label: "Home", icon: LayoutDashboard }];
   }
@@ -51,6 +65,7 @@ export function visibleNavItems(subject: PermissionSubject): NavItem[] {
     return [{ href: "/dashboard", label: "Today", icon: LayoutDashboard }];
   }
   return NAV_ITEMS.filter((item) => {
+    if (item.platformOwnerOnly) return Boolean(extras?.platformOwner);
     if (item.adminOnly) return isAdmin(subject);
     if (item.permission) return can(subject, item.permission);
     return true;

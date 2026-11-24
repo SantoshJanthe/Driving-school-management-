@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 
 import { getProfile, type Profile } from "@/lib/auth/get-profile";
 import { can, type Permission } from "@/lib/auth/permissions";
+import { isPlatformOwner } from "@/lib/subscription/config";
+import { createClient } from "@/lib/supabase/server";
 
 /**
  * Route-guard helpers for Server Components / Server Actions. They are UX
@@ -31,5 +33,16 @@ export async function requireAdmin(): Promise<Profile> {
 export async function requirePermission(key: Permission): Promise<Profile> {
   const profile = await requireProfile();
   if (!can(profile, key)) redirect(`/dashboard?denied=${key}`);
+  return profile;
+}
+
+/** Software owner listed in PLATFORM_OWNER_EMAILS. */
+export async function requirePlatformOwner(): Promise<Profile> {
+  const profile = await requireProfile();
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user || !isPlatformOwner(user.email)) redirect("/dashboard?denied=vendor");
   return profile;
 }

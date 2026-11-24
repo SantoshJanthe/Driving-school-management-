@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { isActivePath, MOBILE_PRIMARY_HREFS, visibleNavItems } from "@/components/layout/nav-items";
-import { useProfile } from "@/components/providers/permission-provider";
+import { usePlatformOwner, useProfile } from "@/components/providers/permission-provider";
 import {
   Sheet,
   SheetContent,
@@ -26,7 +26,7 @@ export function MobileNav() {
   const profile = useProfile();
   const [open, setOpen] = useState(false);
 
-  const items = visibleNavItems(profile);
+  const items = visibleNavItems(profile, { platformOwner: usePlatformOwner() });
   const primary = MOBILE_PRIMARY_HREFS.map((href) => items.find((i) => i.href === href)).filter(
     (i): i is NonNullable<typeof i> => !!i,
   );
