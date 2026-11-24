@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { submitEnquiry, type EnquiryState } from "@/lib/actions/enquiry";
-import { formatINR } from "@/lib/format";
 import type { CoursePackage } from "@/lib/school/packages";
 
 const initial: EnquiryState = {};
@@ -85,7 +84,7 @@ export function EnquiryForm({
         >
           {packages.map((item) => (
             <option key={item.code} value={item.code}>
-              {item.name} · {formatINR(item.fee)}
+              {item.name}
             </option>
           ))}
         </select>
