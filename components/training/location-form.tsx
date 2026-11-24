@@ -17,7 +17,7 @@ export function LocationForm({ sessionId, student }: { sessionId: string; studen
     <form action={action} className="mt-2 grid gap-2 rounded-xl border border-black/10 bg-white/70 p-3">
       <input type="hidden" name="session_id" value={sessionId} />
       <p className="text-xs text-muted-foreground">
-        Last place for {student}. This is a saved point, not a live tracker.
+        Last place and number plate for {student}. This is a saved note, not a live tracker.
       </p>
       {state.error ? (
         <Alert variant="destructive" role="alert">
@@ -29,18 +29,22 @@ export function LocationForm({ sessionId, student }: { sessionId: string; studen
           <AlertDescription>Location saved for the admin.</AlertDescription>
         </Alert>
       ) : null}
-      <div className="grid gap-2 sm:grid-cols-3">
+      <div className="grid gap-2 sm:grid-cols-2">
         <div className="grid gap-1">
           <Label htmlFor={`place-${sessionId}`}>Place</Label>
           <Input id={`place-${sessionId}`} name="label" required maxLength={80} className="h-11" />
         </div>
         <div className="grid gap-1">
-          <Label htmlFor={`lat-${sessionId}`}>Latitude</Label>
-          <Input id={`lat-${sessionId}`} name="latitude" inputMode="decimal" required className="h-11" />
-        </div>
-        <div className="grid gap-1">
-          <Label htmlFor={`lng-${sessionId}`}>Longitude</Label>
-          <Input id={`lng-${sessionId}`} name="longitude" inputMode="decimal" required className="h-11" />
+          <Label htmlFor={`plate-${sessionId}`}>Number plate</Label>
+          <Input
+            id={`plate-${sessionId}`}
+            name="number_plate"
+            required
+            maxLength={15}
+            autoCapitalize="characters"
+            autoComplete="off"
+            className="h-11 uppercase"
+          />
         </div>
       </div>
       <SubmitButton pendingText="Saving…" className="md:w-fit">

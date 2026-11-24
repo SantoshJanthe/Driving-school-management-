@@ -163,7 +163,7 @@ export default async function TrainingPage({
             Saved vehicle locations
           </h2>
           <p className="text-sm text-muted-foreground">
-            Points an instructor saved for a lesson. This is not a live map.
+            Place and number plate an instructor saved for a lesson. This is not a live map.
           </p>
           {locations.length === 0 ? (
             <p className="text-sm text-muted-foreground">No location saved yet.</p>
@@ -172,9 +172,7 @@ export default async function TrainingPage({
               {locations.map((point) => (
                 <li key={point.id} className="rounded-xl border px-4 py-3 text-sm">
                   <p className="font-medium">{point.label}</p>
-                  <p className="text-muted-foreground">
-                    {point.latitude.toFixed(5)}, {point.longitude.toFixed(5)}
-                  </p>
+                  <p className="font-mono text-muted-foreground">{point.number_plate}</p>
                 </li>
               ))}
             </ul>

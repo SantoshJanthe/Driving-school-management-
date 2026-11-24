@@ -18,13 +18,13 @@ export async function saveLessonLocation(
 
   const sessionId = String(formData.get("session_id") ?? "");
   const label = String(formData.get("label") ?? "").trim();
-  const latitude = Number(formData.get("latitude"));
-  const longitude = Number(formData.get("longitude"));
+  const numberPlate = String(formData.get("number_plate") ?? "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "");
   if (!sessionId) return { error: "Choose a lesson." };
   if (label.length < 1 || label.length > 80) return { error: "Enter a short place name." };
-  if (!Number.isFinite(latitude) || latitude < -90 || latitude > 90) return { error: "Enter a latitude." };
-  if (!Number.isFinite(longitude) || longitude < -180 || longitude > 180) {
-    return { error: "Enter a longitude." };
+  if (numberPlate.length < 4 || numberPlate.length > 15) {
+    return { error: "Enter the vehicle number plate." };
   }
 
   const supabase = await createClient();
@@ -47,8 +47,7 @@ export async function saveLessonLocation(
     session_id: session.id,
     vehicle_id: session.vehicle_id,
     label,
-    latitude,
-    longitude,
+    number_plate: numberPlate,
     recorded_by: profile.id,
   });
   if (error) return { error: error.message };

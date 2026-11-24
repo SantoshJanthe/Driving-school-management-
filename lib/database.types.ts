@@ -664,8 +664,7 @@ export type Database = {
           session_id: string;
           vehicle_id: string | null;
           label: string;
-          latitude: number;
-          longitude: number;
+          number_plate: string;
           recorded_by: string | null;
           recorded_at: string;
         };
@@ -675,8 +674,7 @@ export type Database = {
           session_id: string;
           vehicle_id?: string | null;
           label: string;
-          latitude: number;
-          longitude: number;
+          number_plate: string;
           recorded_by?: string | null;
           recorded_at?: string;
         };
