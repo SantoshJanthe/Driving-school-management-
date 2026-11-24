@@ -154,6 +154,8 @@ APP_SERVER_URL=https://your-live-site.example npm run ios:sync
 open ios/App/App.xcodeproj
 ```
 
+Release iOS builds use [IOSSecuritySuite](https://github.com/securing/IOSSecuritySuite). The website uses [Nosecone](https://github.com/arcjet/arcjet-js/tree/main/nosecone) (`@nosecone/next`) for CSP, HSTS, and related security headers.
+
 ```bash
 APP_SERVER_URL=https://your-live-site.example npm run android:apk
 ```

@@ -10,6 +10,7 @@ The phone app is a WKWebView that opens the live HTTPS site. School records stay
 - iTunes file sharing off
 - Stack canaries (`-fstack-protector-all`) and ARC (Xcode default)
 - Sign-in fields disable autocorrect and do not log passwords
+- [IOSSecuritySuite](https://github.com/securing/IOSSecuritySuite) (Swift Package 2.3.0+): jailbreak, debugger, and reverse-engineering checks on release builds. Compromised devices see a block screen instead of the school records. Debug/Xcode builds skip the checks.
 
 Build on a Mac with Xcode 15 or later:
 

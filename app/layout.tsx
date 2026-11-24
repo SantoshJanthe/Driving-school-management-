@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { connection } from "next/server";
 
 import { CursorTrail } from "@/components/layout/cursor-trail";
 import { ServiceWorker } from "@/components/layout/service-worker";
@@ -37,7 +38,10 @@ export const viewport: Viewport = {
   themeColor: "#1a1916",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  // Nosecone puts a per-request CSP nonce on the request; Next only applies it
+  // when the layout is dynamic.
+  await connection();
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="min-h-dvh antialiased">

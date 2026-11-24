@@ -1,8 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import nosecone from "nosecone";
 
 import type { Database } from "@/lib/database.types";
 import { env } from "@/lib/env";
+import { noseconeOptions } from "@/lib/security/nosecone";
 import { visitorUrl } from "@/lib/visitor-origin";
 
 /**
@@ -33,6 +35,11 @@ function matches(pathname: string, paths: string[]) {
   return paths.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
 
+function withSecurity(response: NextResponse, security: Headers) {
+  security.forEach((value, key) => response.headers.set(key, value));
+  return response;
+}
+
 /**
  * Refreshes the Supabase session cookie on every request and applies the
  * redirect rules:
@@ -43,8 +50,10 @@ function matches(pathname: string, paths: string[]) {
  * Deactivated profiles are handled in the (app) layout, which can query the DB.
  */
 export async function updateSession(request: NextRequest) {
+  const security = nosecone(noseconeOptions());
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-pathname", request.nextUrl.pathname);
+  security.forEach((value, key) => requestHeaders.set(key, value));
   let response = NextResponse.next({ request: { headers: requestHeaders } });
 
   const supabase = createServerClient<Database>(env.supabaseUrl, env.supabaseAnonKey, {
@@ -73,23 +82,32 @@ export async function updateSession(request: NextRequest) {
   if (user && pathname !== "/login/mfa") {
     const { data: assurance } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
     if (assurance?.nextLevel === "aal2" && assurance.currentLevel !== "aal2") {
-      return NextResponse.redirect(visitorUrl(request.headers, "/login/mfa", request.nextUrl.origin));
+      return withSecurity(
+        NextResponse.redirect(visitorUrl(request.headers, "/login/mfa", request.nextUrl.origin)),
+        security,
+      );
     }
   }
 
   if (pathname === "/" && user) {
-    return NextResponse.redirect(visitorUrl(request.headers, "/dashboard", request.nextUrl.origin));
+    return withSecurity(
+      NextResponse.redirect(visitorUrl(request.headers, "/dashboard", request.nextUrl.origin)),
+      security,
+    );
   }
 
   if (!user && !matches(pathname, PUBLIC_PATHS)) {
     const login = visitorUrl(request.headers, "/login", request.nextUrl.origin);
     if (pathname !== "/dashboard") login.searchParams.set("next", `${pathname}${search}`);
-    return NextResponse.redirect(login);
+    return withSecurity(NextResponse.redirect(login), security);
   }
 
   if (user && pathname !== "/login/mfa" && matches(pathname, AUTH_ONLY_PATHS)) {
-    return NextResponse.redirect(visitorUrl(request.headers, "/dashboard", request.nextUrl.origin));
+    return withSecurity(
+      NextResponse.redirect(visitorUrl(request.headers, "/dashboard", request.nextUrl.origin)),
+      security,
+    );
   }
 
-  return response;
+  return withSecurity(response, security);
 }
