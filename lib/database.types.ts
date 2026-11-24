@@ -565,6 +565,49 @@ export type Database = {
         };
         Relationships: [];
       };
+      subscription_requests: {
+        Row: {
+          id: string;
+          school_name: string;
+          owner_name: string;
+          phone: string;
+          email: string | null;
+          plan: string;
+          amount_inr: number;
+          payment_method: string;
+          payment_reference: string;
+          status: string;
+          access_token_hash: string;
+          review_note: string | null;
+          reviewed_by: string | null;
+          reviewed_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          school_name: string;
+          owner_name: string;
+          phone: string;
+          email?: string | null;
+          plan?: string;
+          amount_inr: number;
+          payment_method: string;
+          payment_reference: string;
+          status?: string;
+          access_token_hash: string;
+          review_note?: string | null;
+          reviewed_by?: string | null;
+          reviewed_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          status?: string;
+          review_note?: string | null;
+          reviewed_by?: string | null;
+          reviewed_at?: string | null;
+        };
+        Relationships: [];
+      };
       reminders: {
         Row: {
           id: string;

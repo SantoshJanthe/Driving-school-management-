@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { EnquiryForm } from "@/components/marketing/enquiry-form";
+import { SubscribeSection } from "@/components/marketing/subscribe-section";
 import { TopographyBackground } from "@/components/marketing/topography-background";
 import { SchoolLogo } from "@/components/layout/school-logo";
 import { Button } from "@/components/ui/button";
@@ -88,6 +89,9 @@ export default async function HomePage({
         <nav className="flex items-center gap-4 text-sm">
           <a className="hidden underline-offset-4 hover:underline sm:inline" href="#office">
             The office
+          </a>
+          <a className="hidden underline-offset-4 hover:underline sm:inline" href="#subscribe">
+            Get the app
           </a>
           <a className="hidden underline-offset-4 hover:underline sm:inline" href="#enquire">
             Enquire
@@ -185,6 +189,8 @@ export default async function HomePage({
           ))}
         </ol>
       </section>
+
+      <SubscribeSection />
 
       <section className="max-w-xl" aria-labelledby="enquire-heading">
         <div className="rounded-2xl border border-black/10 bg-[#fffcf7] p-5 shadow-[0_18px_50px_rgba(26,25,22,0.05)]">

@@ -10,12 +10,18 @@ import { isAdmin, isInstructorOnly } from "@/lib/auth/permissions";
 import { formatINR } from "@/lib/format";
 import { DEFAULT_PACKAGES } from "@/lib/school/packages";
 import { getOwnSchool } from "@/lib/queries/school";
+import { isPlatformOwner } from "@/lib/subscription/config";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Settings" };
 
 export default async function SettingsPage() {
   const profile = await requireProfile();
   const school = await getOwnSchool();
+  const {
+    data: { user },
+  } = await (await createClient()).auth.getUser();
+  const owner = isPlatformOwner(user?.email);
   const admin = isAdmin(profile);
   const limited = profile.role === "student" || isInstructorOnly(profile);
   const packages = school?.packages ?? DEFAULT_PACKAGES;
@@ -30,6 +36,14 @@ export default async function SettingsPage() {
             : "Branch contact and your own password."
         }
       />
+      {owner ? (
+        <p className="rounded-2xl border border-black/10 bg-[#fffcf7] p-4 text-sm">
+          You can verify software subscription payments.{" "}
+          <Link href="/vendor/subscriptions" className="underline underline-offset-4">
+            Open subscription payments
+          </Link>
+        </p>
+      ) : null}
       <PasswordForm />
       {admin ? <MfaPanel /> : null}
       {!limited && school ? (

@@ -9,7 +9,19 @@ import { env } from "@/lib/env";
  * `matches()` treats a path as a prefix only when it is followed by `/`,
  * so listing `/` does not make every route public.
  */
-const PUBLIC_PATHS = ["/", "/login", "/forgot-password", "/reset-password", "/auth/callback"];
+const PUBLIC_PATHS = [
+  "/",
+  "/login",
+  "/forgot-password",
+  "/reset-password",
+  "/auth/callback",
+  "/subscribe",
+  "/download",
+  "/api/download",
+  "/api/branding",
+  "/manifest.webmanifest",
+  "/sw.js",
+];
 
 /** Signed-in users are bounced away from these to the dashboard. */
 const AUTH_ONLY_PATHS = ["/login", "/forgot-password"];
