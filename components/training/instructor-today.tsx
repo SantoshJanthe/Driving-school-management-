@@ -1,13 +1,23 @@
 import Link from "next/link";
 
 import { PageHeader } from "@/components/layout/page-header";
+import { AvailabilityForm } from "@/components/training/availability-form";
 import { LocationForm } from "@/components/training/location-form";
 import { SessionList } from "@/components/training/session-list";
 import { formatDate } from "@/lib/format";
+import type { InstructorHours } from "@/lib/queries/booking";
 import type { SessionRow } from "@/lib/queries/training";
 import { kolkataDate } from "@/lib/training/constants";
 
-export function InstructorToday({ rows }: { rows: SessionRow[] }) {
+export function InstructorToday({
+  rows,
+  instructorId,
+  hours,
+}: {
+  rows: SessionRow[];
+  instructorId: string;
+  hours: InstructorHours[];
+}) {
   return (
     <div className="grid gap-5">
       <PageHeader
@@ -28,6 +38,7 @@ export function InstructorToday({ rows }: { rows: SessionRow[] }) {
         showApplicant
         linkApplicant={false}
       />
+      <AvailabilityForm instructorId={instructorId} hours={hours} />
       <section className="grid gap-3">
         <h2 className="text-sm font-semibold tracking-wide uppercase">Vehicle location</h2>
         {rows.length === 0 ? (

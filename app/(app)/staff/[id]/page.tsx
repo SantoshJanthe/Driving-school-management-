@@ -3,10 +3,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { StaffEditor } from "@/components/staff/staff-editor";
+import { AvailabilityForm } from "@/components/training/availability-form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { resendInvite, setStaffActive } from "@/lib/actions/staff";
 import { requireAdmin } from "@/lib/auth/guards";
+import { listInstructorHours } from "@/lib/queries/booking";
 import { getStaffMember } from "@/lib/queries/staff";
 
 export const metadata: Metadata = { title: "Staff member" };
@@ -35,6 +37,7 @@ export default async function StaffDetailPage({
   const member = await getStaffMember(id);
   if (!member) notFound();
   const self = member.id === admin.id;
+  const hours = member.is_instructor ? await listInstructorHours(member.id) : [];
 
   return (
     <div className="grid gap-5">
@@ -76,6 +79,7 @@ export default async function StaffDetailPage({
         </div>
       </div>
       <StaffEditor member={member} self={self} />
+      {member.is_instructor ? <AvailabilityForm instructorId={member.id} hours={hours} /> : null}
     </div>
   );
 }

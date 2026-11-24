@@ -1,9 +1,11 @@
 import Link from "next/link";
 
 import { PageHeader } from "@/components/layout/page-header";
+import { BookSlotForm } from "@/components/student/book-slot-form";
 import { StudentUpload } from "@/components/student/upload-document";
 import { DOCUMENT_TYPE_LABELS } from "@/lib/documents/constants";
 import { formatDate, formatINR, formatPhone } from "@/lib/format";
+import type { OpenSlot } from "@/lib/queries/booking";
 import type { StudentHome, StudentSession } from "@/lib/queries/student-home";
 import { ATTENDANCE_LABELS } from "@/lib/training/constants";
 
@@ -36,7 +38,21 @@ const RESULT_LABELS: Record<string, string> = {
   fail: "Fail",
 };
 
-export function StudentHomeView({ home }: { home: StudentHome | null }) {
+export function StudentHomeView({
+  home,
+  date,
+  today,
+  latest,
+  slots,
+  changeId,
+}: {
+  home: StudentHome | null;
+  date: string;
+  today: string;
+  latest: string;
+  slots: OpenSlot[];
+  changeId?: string;
+}) {
   if (!home) {
     return (
       <PageHeader
@@ -45,6 +61,8 @@ export function StudentHomeView({ home }: { home: StudentHome | null }) {
       />
     );
   }
+
+  const changing = changeId ? home.upcoming.find((session) => session.id === changeId) : undefined;
 
   return (
     <div className="grid gap-6">
@@ -110,12 +128,21 @@ export function StudentHomeView({ home }: { home: StudentHome | null }) {
         </dl>
       </section>
 
+      <BookSlotForm
+        date={date}
+        today={today}
+        latest={latest}
+        slots={slots}
+        sessionId={changing?.id}
+        sessionLabel={changing ? sessionLine(changing) : undefined}
+      />
+
       <section className="grid gap-3" aria-labelledby="upcoming-heading">
         <h2 id="upcoming-heading" className="text-sm font-semibold tracking-wide uppercase">
           Upcoming lessons
         </h2>
         {home.upcoming.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No upcoming lessons.</p>
+          <p className="text-sm text-muted-foreground">No upcoming lessons. Book a free hour above.</p>
         ) : (
           <ul className="grid gap-2">
             {home.upcoming.map((session) => (
@@ -127,6 +154,14 @@ export function StudentHomeView({ home }: { home: StudentHome | null }) {
                   {session.attendance ? ` · ${ATTENDANCE_LABELS[session.attendance]}` : ""}
                 </p>
                 {session.remarks ? <p className="text-sm">{session.remarks}</p> : null}
+                {session.status === "scheduled" ? (
+                  <Link
+                    href={`/dashboard?date=${session.session_date}&change=${session.id}`}
+                    className="mt-2 inline-block text-sm underline underline-offset-4"
+                  >
+                    Change this time
+                  </Link>
+                ) : null}
               </li>
             ))}
           </ul>

@@ -302,6 +302,36 @@ do $$ begin
   raise exception 'FAIL staff created a school';
 exception when insufficient_privilege then raise notice 'PASS staff cannot create a school'; end $$;
 
+-- ---------------- student slot booking ----------------
+reset role;
+select pg_temp.login('10000000-0000-0000-0000-000000000001');
+do $$ begin
+  if to_regclass('public.instructor_availability') is null then
+    raise notice 'PASS instructor_availability not in this test database';
+  else
+    begin
+      insert into public.instructor_availability (school_id, instructor_id, weekday, start_time, end_time)
+      values ('00000000-0000-0000-0000-00000000000a', '10000000-0000-0000-0000-000000000001', 1, '09:00', '10:00');
+      raise notice 'PASS admin can publish instructor hours';
+    exception when others then
+      raise exception 'FAIL admin could not publish hours: %', sqlerrm;
+    end;
+  end if;
+end $$;
+select pg_temp.login('10000000-0000-0000-0000-000000000021');
+do $$ begin
+  if to_regclass('public.instructor_availability') is null then
+    return;
+  end if;
+  begin
+    insert into public.instructor_availability (school_id, instructor_id, weekday, start_time, end_time)
+    values ('00000000-0000-0000-0000-00000000000a', '10000000-0000-0000-0000-000000000021', 1, '09:00', '10:00');
+    raise exception 'FAIL student published instructor hours';
+  exception when insufficient_privilege then
+    raise notice 'PASS student cannot publish instructor hours';
+  end;
+end $$;
+
 -- ---------------- anon ----------------
 reset role;
 set role anon;

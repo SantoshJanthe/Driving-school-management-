@@ -50,3 +50,39 @@ export function shiftDate(isoDate: string, days: number): string {
 export function isIsoDate(value: string | undefined): value is string {
   return !!value && /^\d{4}-\d{2}-\d{2}$/.test(value);
 }
+
+/** 0 = Sunday … 6 = Saturday, matching Postgres extract(dow). */
+export const WEEKDAYS = [
+  { value: 0, label: "Sunday" },
+  { value: 1, label: "Monday" },
+  { value: 2, label: "Tuesday" },
+  { value: 3, label: "Wednesday" },
+  { value: 4, label: "Thursday" },
+  { value: 5, label: "Friday" },
+  { value: 6, label: "Saturday" },
+] as const;
+
+export function weekdayOf(isoDate: string) {
+  const weekday = new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    timeZone: "Asia/Kolkata",
+  }).format(new Date(`${isoDate}T12:00:00+05:30`));
+  return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(weekday);
+}
+
+export function clockTime(value: string | null | undefined) {
+  return value ? value.slice(0, 5) : "";
+}
+
+/** Current time in Asia/Kolkata as HH:MM. */
+export function kolkataClock() {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Kolkata",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(new Date());
+  const hour = parts.find((part) => part.type === "hour")?.value ?? "00";
+  const minute = parts.find((part) => part.type === "minute")?.value ?? "00";
+  return `${hour}:${minute}`;
+}

@@ -345,6 +345,35 @@ export type Database = {
           },
         ];
       };
+      instructor_availability: {
+        Row: {
+          id: string;
+          school_id: string;
+          instructor_id: string;
+          weekday: number;
+          start_time: string;
+          end_time: string;
+          is_active: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          school_id: string;
+          instructor_id: string;
+          weekday: number;
+          start_time: string;
+          end_time: string;
+          is_active?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          weekday?: number;
+          start_time?: string;
+          end_time?: string;
+          is_active?: boolean;
+        };
+        Relationships: [];
+      };
       vehicles: {
         Row: {
           id: string;
@@ -682,7 +711,19 @@ export type Database = {
         Relationships: [];
       };
     };
-    Views: Record<string, never>;
+    Views: {
+      instructor_busy_slots: {
+        Row: {
+          id: string;
+          school_id: string;
+          instructor_id: string;
+          session_date: string;
+          start_time: string | null;
+          end_time: string | null;
+        };
+        Relationships: [];
+      };
+    };
     Functions: {
       current_profile: {
         Args: Record<string, never>;
