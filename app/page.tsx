@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { EnquiryForm } from "@/components/marketing/enquiry-form";
+import { TopographyBackground } from "@/components/marketing/topography-background";
 import { SchoolLogo } from "@/components/layout/school-logo";
 import { Button } from "@/components/ui/button";
 import { env } from "@/lib/env";
@@ -84,7 +85,9 @@ export default async function HomePage({
   const schoolQuery = selected ? `school=${selected.id}&` : "";
 
   return (
-    <div className="page-enter mx-auto flex min-h-dvh w-full max-w-5xl flex-col gap-16 px-4 py-8 md:px-8 md:py-12">
+    <div className="relative min-h-dvh overflow-hidden">
+      <TopographyBackground />
+      <div className="page-enter relative z-10 mx-auto flex min-h-dvh w-full max-w-5xl flex-col gap-16 px-4 py-8 md:px-8 md:py-12">
       <header className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           {school.hasLogo ? (
@@ -147,7 +150,10 @@ export default async function HomePage({
         </form>
       ) : null}
 
-      <section className="grid gap-4">
+      <section className="grid gap-4 rounded-[2rem] border border-black/10 bg-[#fffcf7]/80 p-6 shadow-[0_18px_50px_rgba(26,25,22,0.05)] backdrop-blur-[2px] md:p-10">
+        <p className="text-xs font-medium tracking-[0.18em] text-[#8a7355] uppercase">
+          {env.appName}
+        </p>
         <h1 className="max-w-2xl text-4xl font-medium tracking-tight md:text-5xl">
           Lessons for the licence you actually need.
         </h1>
@@ -200,7 +206,7 @@ export default async function HomePage({
             "Questions go to the branch, and an enquiry is the same record the staff open later.",
           ],
         ].map(([title, body]) => (
-          <div key={title} className="grid gap-2">
+          <div key={title} className="grid gap-2 rounded-2xl border border-black/10 bg-[#fffcf7]/75 p-5 backdrop-blur-[2px]">
             <h3 className="text-base font-medium">{title}</h3>
             <p className="text-sm text-muted-foreground">{body}</p>
           </div>
@@ -267,6 +273,7 @@ export default async function HomePage({
           <EnquiryForm packages={school.packages} selected={course} schoolId={selected?.id} />
         </div>
       </section>
+      </div>
     </div>
   );
 }
