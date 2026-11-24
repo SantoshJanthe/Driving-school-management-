@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { visitorOrigin } from "@/lib/visitor-origin";
 
-const REASONS = new Set(["deactivated", "no_profile", "expired"]);
+const REASONS = new Set(["deactivated", "no_profile", "expired", "school_suspended"]);
 
 /**
  * Forced sign-out used by server components, which cannot clear cookies

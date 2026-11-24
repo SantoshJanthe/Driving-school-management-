@@ -6,14 +6,12 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
-import { requireProfile } from "@/lib/auth/guards";
+import { requirePlatformOwner } from "@/lib/auth/guards";
 import { createRazorpayPaymentLink } from "@/lib/razorpay/server";
 import { publicOrigin } from "@/lib/request-origin";
-import { isPlatformOwner } from "@/lib/subscription/config";
 import { offeredMethods } from "@/lib/subscription/methods";
 import { newAccessToken } from "@/lib/subscription/requests";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createClient } from "@/lib/supabase/server";
 
 export type SubscribeState = { error?: string };
 
@@ -168,13 +166,9 @@ export async function startRazorpaySubscription(
 }
 
 async function requireOwner() {
-  await requireProfile();
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user || !isPlatformOwner(user.email)) redirect("/dashboard?denied=vendor");
-  return { userId: user.id };
+  // profiles.id is the auth user id, so the guard's profile carries both.
+  const profile = await requirePlatformOwner();
+  return { userId: profile.id };
 }
 
 export type MethodsState = { error?: string; ok?: boolean };

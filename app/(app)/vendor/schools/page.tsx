@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
+import { SchoolAccessForm } from "@/components/vendor/school-access-form";
 import { SchoolAdminPasswordForm } from "@/components/vendor/school-admin-password-form";
 import { requirePlatformOwner } from "@/lib/auth/guards";
 import { formatDate, formatINR } from "@/lib/format";
@@ -19,14 +20,14 @@ const METHOD_LABEL: Record<string, string> = {
 };
 
 export default async function VendorSchoolsPage() {
-  await requirePlatformOwner();
+  const owner = await requirePlatformOwner();
   const schools = await listSoftwareSchools();
 
   return (
     <div className="grid gap-6">
       <PageHeader
         title="Schools"
-        description="Every school on this software, the payment records that unlock the app, and a password you can set for each school admin."
+        description="Every school on this software: the payment records that unlock the app, a password you can set for each school admin, and a switch that pauses or restores a school's access."
         actions={
           <Link href="/schools/new" className="text-sm underline underline-offset-4">
             New school
@@ -54,10 +55,23 @@ export default async function VendorSchoolsPage() {
                     Opened {formatDate(school.created_at)}
                   </p>
                 </div>
-                <Badge variant={school.is_active ? "secondary" : "outline"}>
-                  {school.is_active ? "Active" : "Inactive"}
-                </Badge>
+                <div className="grid justify-items-end gap-2">
+                  <Badge variant={school.is_active ? "secondary" : "outline"}>
+                    {school.is_active ? "Active" : "Paused"}
+                  </Badge>
+                  <SchoolAccessForm
+                    schoolId={school.id}
+                    active={school.is_active}
+                    isOwnSchool={school.id === owner.school_id}
+                  />
+                </div>
               </div>
+              {school.is_active ? null : (
+                <p className="text-sm text-muted-foreground">
+                  Paused: nobody at this school can sign in, and their records stay sealed until you
+                  restore access.
+                </p>
+              )}
 
               <section className="grid gap-2">
                 <h3 className="text-sm font-semibold tracking-wide uppercase">Software access</h3>

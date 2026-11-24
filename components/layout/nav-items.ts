@@ -46,7 +46,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/staff", label: "Staff", icon: UserCog, adminOnly: true },
   { href: "/activity-logs", label: "Logs", icon: ScrollText, adminOnly: true },
   { href: "/settings", label: "Settings", icon: Settings },
-  { href: "/schools/new", label: "New school", icon: Building2, adminOnly: true },
+  { href: "/schools/new", label: "New school", icon: Building2, platformOwnerOnly: true },
   { href: "/vendor/schools", label: "Schools", icon: Building2, platformOwnerOnly: true },
   { href: "/vendor/subscriptions", label: "Subscriptions", icon: Wallet, platformOwnerOnly: true },
 ];

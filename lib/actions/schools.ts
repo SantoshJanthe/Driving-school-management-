@@ -2,11 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 
-import { requireAdmin, requirePlatformOwner } from "@/lib/auth/guards";
+import { requirePlatformOwner } from "@/lib/auth/guards";
 import { deleteAuthUser, provisionAuthUser, setAuthPassword } from "@/lib/auth/provision-user";
 import { DEFAULT_PACKAGES } from "@/lib/school/packages";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createClient } from "@/lib/supabase/server";
 import { resetPasswordSchema } from "@/lib/validation/auth";
 
 export type SchoolSetupState = {
@@ -18,7 +17,7 @@ export async function createSchoolWithAdmin(
   _prev: SchoolSetupState,
   formData: FormData,
 ): Promise<SchoolSetupState> {
-  await requireAdmin();
+  await requirePlatformOwner();
   const schoolName = String(formData.get("school_name") ?? "").trim();
   const address = String(formData.get("address") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim();
@@ -45,7 +44,9 @@ export async function createSchoolWithAdmin(
   }
   const password = passwordParsed.data.password;
 
-  const supabase = await createClient();
+  // Onboarding runs with the service role: the owner is an admin of their own
+  // school only, and creating a tenant must not depend on that membership.
+  const supabase = createAdminClient();
   const { data: schoolId, error: schoolError } = await supabase.rpc("create_school", {
     p_name: schoolName,
     p_address: address,
@@ -86,7 +87,45 @@ export async function createSchoolWithAdmin(
     return { error: "The admin profile was not created for that school." };
   }
 
+  revalidatePath("/vendor/schools");
   return { issued: { schoolName, email: adminEmail, password } };
+}
+
+export type SchoolAccessState = { error?: string; success?: string };
+
+/**
+ * Pauses or restores one school's access to the software. Suspending clears
+ * app.current_school_id() for everyone in that school, so RLS stops returning
+ * rows on every table, in storage and in the RPCs — no page-by-page checks.
+ */
+export async function setSchoolAccess(
+  _prev: SchoolAccessState,
+  formData: FormData,
+): Promise<SchoolAccessState> {
+  const owner = await requirePlatformOwner();
+  const schoolId = String(formData.get("school_id") ?? "");
+  const active = String(formData.get("active") ?? "") === "true";
+  if (!schoolId) return { error: "Choose a school." };
+  if (!active && schoolId === owner.school_id) {
+    return { error: "You cannot pause the school your own login belongs to." };
+  }
+
+  const admin = createAdminClient();
+  const { data: school, error } = await admin
+    .from("schools")
+    .update({ is_active: active })
+    .eq("id", schoolId)
+    .select("name")
+    .maybeSingle();
+  if (error) return { error: error.message };
+  if (!school) return { error: "That school no longer exists." };
+
+  revalidatePath("/vendor/schools");
+  return {
+    success: active
+      ? `${school.name} can sign in again.`
+      : `${school.name} is paused. Their logins are blocked until you restore access.`,
+  };
 }
 
 export type SchoolAdminPasswordState = { error?: string; success?: string };

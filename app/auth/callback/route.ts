@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import type { EmailOtpType } from "@supabase/supabase-js";
 
+import { denySession } from "@/lib/auth/session-gate";
 import { createClient } from "@/lib/supabase/server";
 import { safeNextPath } from "@/lib/validation/auth";
 import { visitorOrigin } from "@/lib/visitor-origin";
@@ -32,7 +33,25 @@ export async function GET(request: NextRequest) {
   }
 
   if (failed) {
+    // A provider that refuses or is cancelled sends back `error` and no code;
+    // that belongs on the sign-in page, not on password recovery.
+    if (searchParams.has("error") || searchParams.has("error_description")) {
+      return NextResponse.redirect(`${origin}/login?error=google_failed`);
+    }
     return NextResponse.redirect(`${origin}/forgot-password?error=link_invalid`);
   }
+
+  // A Google account is only a second key to an account the school already
+  // created. Without a profile the session is thrown away here, so OAuth can
+  // never become a self-service sign-up.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const denial = await denySession(supabase, user?.email);
+  if (denial) {
+    await supabase.auth.signOut();
+    return NextResponse.redirect(`${origin}/login?error=${denial}`);
+  }
+
   return NextResponse.redirect(`${origin}${next}`);
 }

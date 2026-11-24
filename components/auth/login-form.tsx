@@ -6,13 +6,22 @@ import { useActionState } from "react";
 import { FormField, PasswordField } from "@/components/auth/form-field";
 import { SubmitButton } from "@/components/auth/submit-button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { login, type AuthFormState } from "@/lib/actions/auth";
+import { login, signInWithGoogle, type AuthFormState } from "@/lib/actions/auth";
 
 const initialState: AuthFormState = {};
 
-export function LoginForm({ next, initialError }: { next?: string; initialError?: string }) {
+export function LoginForm({
+  next,
+  initialError,
+  google = false,
+}: {
+  next?: string;
+  initialError?: string;
+  google?: boolean;
+}) {
   const [state, formAction] = useActionState(login, initialState);
-  const error = state.error ?? initialError;
+  const [googleState, googleAction] = useActionState(signInWithGoogle, initialState);
+  const error = state.error ?? googleState.error ?? initialError;
 
   return (
     <form action={formAction} className="grid gap-4" noValidate>
@@ -46,6 +55,26 @@ export function LoginForm({ next, initialError }: { next?: string; initialError?
       />
 
       <SubmitButton pendingText="Signing in…">Sign in</SubmitButton>
+
+      {google ? (
+        <>
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            <span className="h-px flex-1 bg-border" />
+            or
+            <span className="h-px flex-1 bg-border" />
+          </div>
+          <SubmitButton
+            formAction={googleAction}
+            variant="outline"
+            pendingText="Opening Google…"
+          >
+            Continue with Google
+          </SubmitButton>
+          <p className="text-center text-xs text-muted-foreground">
+            Use the Google address your school registered. Google cannot create a new account.
+          </p>
+        </>
+      ) : null}
 
       <Link
         href="/forgot-password"

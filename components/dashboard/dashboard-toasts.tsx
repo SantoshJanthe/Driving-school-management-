@@ -26,9 +26,11 @@ export function DashboardToasts() {
       const label =
         denied === "admin"
           ? "That page is for administrators only."
-          : `You don't have permission for that page (${
-              PERMISSION_LABELS[denied as Permission]?.toLowerCase() ?? denied
-            }).`;
+          : denied === "vendor"
+            ? "That page belongs to the software owner."
+            : `You don't have permission for that page (${
+                PERMISSION_LABELS[denied as Permission]?.toLowerCase() ?? denied
+              }).`;
       toast.error(label);
     }
     if (password === "updated") {

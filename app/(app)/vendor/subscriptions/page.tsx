@@ -1,18 +1,15 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { requireProfile } from "@/lib/auth/guards";
+import { requirePlatformOwner } from "@/lib/auth/guards";
 import { rejectSubscription, verifySubscription } from "@/lib/actions/subscription";
 import { formatDateTime, formatINR } from "@/lib/format";
-import { isPlatformOwner } from "@/lib/subscription/config";
 import { offeredMethods } from "@/lib/subscription/methods";
 import { listRequests } from "@/lib/subscription/requests";
 import { PaymentMethodsForm } from "@/components/vendor/payment-methods-form";
-import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Subscriptions" };
 export const dynamic = "force-dynamic";
@@ -25,12 +22,7 @@ const METHOD_LABEL: Record<string, string> = {
 };
 
 export default async function VendorSubscriptionsPage() {
-  await requireProfile();
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user || !isPlatformOwner(user.email)) redirect("/dashboard?denied=vendor");
+  await requirePlatformOwner();
 
   const [requests, offered] = await Promise.all([listRequests(), offeredMethods()]);
 

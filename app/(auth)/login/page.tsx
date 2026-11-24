@@ -2,7 +2,12 @@ import type { Metadata } from "next";
 
 import { LoginForm } from "@/components/auth/login-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DEACTIVATED_MESSAGE, NO_PROFILE_MESSAGE } from "@/lib/auth/messages";
+import {
+  DEACTIVATED_MESSAGE,
+  NO_PROFILE_MESSAGE,
+  SCHOOL_SUSPENDED_MESSAGE,
+} from "@/lib/auth/messages";
+import { googleSignInEnabled } from "@/lib/auth/oauth";
 import { safeNextPath } from "@/lib/validation/auth";
 
 export const metadata: Metadata = { title: "Sign in" };
@@ -10,7 +15,9 @@ export const metadata: Metadata = { title: "Sign in" };
 const ERROR_MESSAGES: Record<string, string> = {
   deactivated: DEACTIVATED_MESSAGE,
   no_profile: NO_PROFILE_MESSAGE,
+  school_suspended: SCHOOL_SUSPENDED_MESSAGE,
   expired: "Your session has expired. Please sign in again.",
+  google_failed: "Google sign-in did not complete. Try again or use your password.",
 };
 
 type SearchParams = Promise<{ next?: string; error?: string }>;
@@ -29,6 +36,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
         <LoginForm
           next={safeNext !== "/dashboard" ? safeNext : undefined}
           initialError={error ? ERROR_MESSAGES[error] : undefined}
+          google={googleSignInEnabled()}
         />
         <div className="rounded-xl border border-black/10 bg-[#f7f4ee] px-3 py-3 text-xs text-[#1a1916]">
           <p className="font-semibold">Demo accounts</p>

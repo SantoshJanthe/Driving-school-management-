@@ -729,6 +729,10 @@ export type Database = {
         Args: Record<string, never>;
         Returns: Database["public"]["Tables"]["profiles"]["Row"] | null;
       };
+      current_school_access: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
       dashboard_summary: {
         Args: Record<string, never>;
         Returns: Json;

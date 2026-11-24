@@ -1,11 +1,13 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { requireProfile } from "@/lib/auth/guards";
 import { clearLoginLock, loginLockMessage, recordFailedLogin } from "@/lib/auth/lockout";
 import { createClient } from "@/lib/supabase/server";
-import { DEACTIVATED_MESSAGE, NO_PROFILE_MESSAGE } from "@/lib/auth/messages";
+import { googleSignInEnabled } from "@/lib/auth/oauth";
+import { DENIAL_MESSAGES, denySession } from "@/lib/auth/session-gate";
 import { env } from "@/lib/env";
 import {
   forgotPasswordSchema,
@@ -13,6 +15,7 @@ import {
   resetPasswordSchema,
   safeNextPath,
 } from "@/lib/validation/auth";
+import { visitorOrigin } from "@/lib/visitor-origin";
 
 export type AuthFormState = {
   error?: string;
@@ -64,14 +67,10 @@ export async function login(_prev: AuthFormState, formData: FormData): Promise<A
 
   // Deactivated users can still authenticate with Supabase Auth until the admin
   // ban propagates; the profile flag is the source of truth, so check it here.
-  const { data: profile } = await supabase.rpc("current_profile");
-  if (!profile || !profile.id) {
+  const denial = await denySession(supabase, parsed.data.email);
+  if (denial) {
     await supabase.auth.signOut();
-    return { error: NO_PROFILE_MESSAGE };
-  }
-  if (!profile.is_active) {
-    await supabase.auth.signOut();
-    return { error: DEACTIVATED_MESSAGE };
+    return { error: DENIAL_MESSAGES[denial] };
   }
 
   // Best effort: the login row is useful for the activity log but must never
@@ -125,6 +124,38 @@ export async function changeOwnPassword(
   }
   await supabase.auth.signOut({ scope: "others" });
   return { success: "Password updated. Other sessions were signed out." };
+}
+
+/**
+ * Hands the browser to Google. Supabase holds the client id and secret, so the
+ * app only asks for the provider URL and never sees the OAuth credentials.
+ * Nothing is provisioned here: the callback refuses any Google account that has
+ * no staff or student profile, so this is a second door for existing users, not
+ * a sign-up path.
+ */
+export async function signInWithGoogle(
+  _prev: AuthFormState,
+  formData: FormData,
+): Promise<AuthFormState> {
+  if (!googleSignInEnabled()) {
+    return { error: "Google sign-in is not connected for this deployment." };
+  }
+
+  const next = safeNextPath(formData.get("next")?.toString());
+  const origin = visitorOrigin(await headers()) ?? env.appUrl;
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
+      queryParams: { prompt: "select_account" },
+    },
+  });
+
+  if (error || !data?.url) {
+    return { error: "Google sign-in is unavailable right now. Use your password instead." };
+  }
+  redirect(data.url);
 }
 
 export async function logout() {

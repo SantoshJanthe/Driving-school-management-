@@ -293,17 +293,41 @@ end $$;
 select pg_temp.login('10000000-0000-0000-0000-000000000001');
 select pg_temp.check('admin still sees the student applicant',
   (select count(*) = 1 from public.applicants where id = '20000000-0000-0000-0000-000000000021'));
-select public.create_school('Other Driving School', '1 Test Road', '9800011111', 'other@example.com', '{}'::jsonb);
-select pg_temp.check('creating admin cannot see the new school',
-  (select count(*) = 0 from public.schools where name = 'Other Driving School'));
+do $$ begin
+  perform public.create_school('Other Driving School', '1 Test Road', '9800011111', 'other@example.com', '{}'::jsonb);
+  raise exception 'FAIL admin created a school';
+exception when insufficient_privilege then raise notice 'PASS school admin cannot create a school'; end $$;
 select pg_temp.login('10000000-0000-0000-0000-000000000002');
 do $$ begin
   perform public.create_school('Staff School', null, null, null, '{}'::jsonb);
   raise exception 'FAIL staff created a school';
 exception when insufficient_privilege then raise notice 'PASS staff cannot create a school'; end $$;
 
+-- ---------------- suspended school ----------------
+-- Pausing a school clears app.current_school_id(), which is what every policy
+-- reads, so its members lose every row until the owner restores access.
+reset role;
+update public.schools set is_active = false where id = '00000000-0000-0000-0000-00000000000a';
+set role authenticated;
+select pg_temp.login('10000000-0000-0000-0000-000000000001');
+select pg_temp.check('suspended school: admin has no school context',
+  app.current_school_id() is null);
+select pg_temp.check('suspended school: no applicants', (select count(*) = 0 from public.applicants));
+select pg_temp.check('suspended school: no school row', (select count(*) = 0 from public.schools));
+select pg_temp.check('suspended school: profile still readable for the message',
+  (select (public.current_profile()).id = '10000000-0000-0000-0000-000000000001'));
+select pg_temp.check('suspended school: access state says paused',
+  (public.current_school_access() ->> 'is_active') = 'false');
+reset role;
+update public.schools set is_active = true where id = '00000000-0000-0000-0000-00000000000a';
+set role authenticated;
+select pg_temp.login('10000000-0000-0000-0000-000000000001');
+select pg_temp.check('restored school: applicants are back',
+  (select count(*) > 0 from public.applicants));
+
 -- ---------------- student slot booking ----------------
 reset role;
+set role authenticated;
 select pg_temp.login('10000000-0000-0000-0000-000000000001');
 do $$ begin
   if to_regclass('public.instructor_availability') is null then
