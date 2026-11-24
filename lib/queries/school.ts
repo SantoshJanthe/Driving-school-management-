@@ -10,6 +10,8 @@ export type OwnSchool = {
   address: string | null;
   contact_phone: string | null;
   email: string | null;
+  logo_path: string | null;
+  updated_at: string;
   settings: Json;
   packages: CoursePackage[];
 };
@@ -19,7 +21,7 @@ export const getOwnSchool = cache(async (): Promise<OwnSchool | null> => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("schools")
-    .select("id, name, address, contact_phone, email, settings")
+    .select("id, name, address, contact_phone, email, logo_path, updated_at, settings")
     .limit(1)
     .maybeSingle();
   if (error || !data) return null;

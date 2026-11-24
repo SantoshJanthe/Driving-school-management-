@@ -40,6 +40,8 @@ export default async function SettingsPage() {
               address={school.address ?? ""}
               phone={school.contact_phone ?? ""}
               email={school.email ?? ""}
+              hasLogo={Boolean(school.logo_path)}
+              logoVersion={school.updated_at}
             />
             <p className="text-sm text-muted-foreground">
               Course names, fees, and session counts are edited on the{" "}
