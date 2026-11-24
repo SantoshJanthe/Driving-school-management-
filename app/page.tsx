@@ -11,8 +11,9 @@ import { createClient } from "@/lib/supabase/server";
 import { formatINR } from "@/lib/format";
 
 export const metadata: Metadata = {
-  title: { absolute: `Learn to drive · ${env.appName}` },
-  description: "Courses, fees, and an enquiry form for the driving school.",
+  title: { absolute: env.appName },
+  description:
+    "Software for motor driving schools: applicants, training, fees, documents, and staff.",
 };
 
 type PublicSchool = {
@@ -101,17 +102,13 @@ export default async function HomePage({
             <SchoolLogo className="size-10 rounded-xl" />
           )}
           <div>
-            <p className="text-sm font-medium tracking-tight">{school.name}</p>
-            {school.phone ? (
-              <a className="text-xs text-muted-foreground" href={`tel:${school.phone}`}>
-                {school.phone}
-              </a>
-            ) : null}
+            <p className="text-sm font-medium tracking-tight">{env.appName}</p>
+            <p className="text-xs text-muted-foreground">For motor driving schools</p>
           </div>
         </div>
         <nav className="flex items-center gap-4 text-sm">
-          <a className="hidden underline-offset-4 hover:underline sm:inline" href="#courses">
-            Courses
+          <a className="hidden underline-offset-4 hover:underline sm:inline" href="#office">
+            The office
           </a>
           <a className="hidden underline-offset-4 hover:underline sm:inline" href="#enquire">
             Enquire
@@ -155,18 +152,21 @@ export default async function HomePage({
           {env.appName}
         </p>
         <h1 className="max-w-2xl text-4xl font-medium tracking-tight md:text-5xl">
-          Lessons for the licence you actually need.
+          Run your motor driving school from one office record.
         </h1>
         <p className="max-w-xl text-base text-muted-foreground">
-          Pick a course, send an enquiry, and the office will call you to fix a start date.
-          Training, fees, and documents stay on the school’s own records.
+          Applicants, training, fees, documents, and staff stay with the school that owns them.
+          A learner can still send an enquiry to the branch you select below.
         </p>
       </section>
 
       <section id="courses" className="grid gap-4" aria-labelledby="courses-heading">
         <h2 id="courses-heading" className="text-2xl font-medium tracking-tight">
-          Courses and fees
+          Courses this school has entered
         </h2>
+        <p className="max-w-xl text-sm text-muted-foreground">
+          These fees belong to {school.name}. They are not a price for the software.
+        </p>
         <ul className="grid gap-4 md:grid-cols-3">
           {school.packages.map((item) => (
             <li
@@ -181,29 +181,35 @@ export default async function HomePage({
               <p className="text-2xl font-medium">{formatINR(item.fee)}</p>
               <p className="text-xs text-muted-foreground">{item.sessions} sessions included</p>
               <Button asChild variant="outline" className="mt-auto h-11">
-                <Link href={`/?${schoolQuery}course=${item.code}#enquire`}>Enquire about this course</Link>
+                <Link href={`/?${schoolQuery}course=${item.code}#enquire`}>
+                  Send an enquiry to this school
+                </Link>
               </Button>
             </li>
           ))}
         </ul>
       </section>
 
-      <section className="grid gap-6 md:grid-cols-3" aria-labelledby="why-heading">
+      <section id="office" className="grid gap-6 md:grid-cols-2" aria-labelledby="why-heading">
         <h2 id="why-heading" className="sr-only">
-          Why train here
+          What the office runs
         </h2>
         {[
           [
-            "Your own instructor",
-            "Sessions are booked with a named instructor from the school, not a random roster.",
+            "Applicants",
+            "An enquiry becomes a learner record. Staff follow status from the first call through to the licence.",
           ],
           [
-            "A record of every lesson",
-            "Attendance, payments, and documents stay on your application.",
+            "Training",
+            "Book lessons on a vehicle and an instructor, then mark attendance on the day.",
           ],
           [
-            "One office number",
-            "Questions go to the branch, and an enquiry is the same record the staff open later.",
+            "Fees and documents",
+            "Record what was paid at the desk and keep each file on that learner.",
+          ],
+          [
+            "Staff",
+            "Invite the office, set what each person can do, and give an instructor only today’s students.",
           ],
         ].map(([title, body]) => (
           <div key={title} className="grid gap-2 rounded-2xl border border-black/10 bg-[#fffcf7]/75 p-5 backdrop-blur-[2px]">
@@ -219,9 +225,9 @@ export default async function HomePage({
         </h2>
         <ol className="grid gap-4 md:grid-cols-3">
           {[
-            ["1. Enquire", "Tell us the course and a mobile number."],
-            ["2. Train", "The office schedules sessions and tracks them against your fee."],
-            ["3. Test", "Staff update the licence status as you move through the process."],
+            ["1. Open the school", "Each school has its own people, courses, and records."],
+            ["2. Work the day", "Staff take applicants, lessons, and payments on that school only."],
+            ["3. Hand the learner a login", "A student sees their own course, lessons, fees, and documents."],
           ].map(([title, body]) => (
             <li key={title} className="rounded-2xl border border-black/10 bg-white/60 p-5">
               <p className="font-medium">{title}</p>
@@ -231,28 +237,12 @@ export default async function HomePage({
         </ol>
       </section>
 
-      <section className="grid gap-3" aria-labelledby="stories-heading">
-        <h2 id="stories-heading" className="text-2xl font-medium tracking-tight">
-          Sample notes
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          Placeholder quotes until the school adds real ones.
-        </p>
-        <div className="grid gap-4 md:grid-cols-2">
-          <blockquote className="rounded-2xl border border-dashed border-black/15 p-5 text-sm">
-            “Morning slots made it possible to finish before work.” — Sample learner
-          </blockquote>
-          <blockquote className="rounded-2xl border border-dashed border-black/15 p-5 text-sm">
-            “I could see which classes were still left.” — Sample learner
-          </blockquote>
-        </div>
-      </section>
-
       <section className="grid gap-8 md:grid-cols-2" aria-labelledby="contact-heading">
         <div className="grid gap-3">
           <h2 id="contact-heading" className="text-2xl font-medium tracking-tight">
-            Branch
+            Selected school
           </h2>
+          <p className="text-sm font-medium">{school.name}</p>
           <p className="text-sm">{school.address ?? "Address not set yet."}</p>
           {school.phone ? (
             <a className="text-sm underline-offset-4 hover:underline" href={`tel:${school.phone}`}>
@@ -269,7 +259,10 @@ export default async function HomePage({
           ) : null}
         </div>
         <div className="rounded-2xl border border-black/10 bg-[#fffcf7] p-5 shadow-[0_18px_50px_rgba(26,25,22,0.05)]">
-          <h2 className="mb-4 text-lg font-medium">Send an enquiry</h2>
+          <h2 className="mb-1 text-lg font-medium">Send an enquiry</h2>
+          <p className="mb-4 text-sm text-muted-foreground">
+            This reaches {school.name} as a learner enquiry. It does not start a software subscription.
+          </p>
           <EnquiryForm packages={school.packages} selected={course} schoolId={selected?.id} />
         </div>
       </section>
