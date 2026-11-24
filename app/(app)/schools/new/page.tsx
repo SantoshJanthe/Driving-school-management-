@@ -21,7 +21,7 @@ export default async function NewSchoolPage() {
     <div className="grid gap-6">
       <PageHeader
         title="New school"
-        description="Creates another school and its first admin. Public sign-up stays off. You will not be able to open that school's records."
+        description="Creates another school and its first admin, with the password you set. Public sign-up stays off. You will not be able to open that school's records."
       />
       <NewSchoolForm currentSchool={school?.name ?? env.appName} />
     </div>

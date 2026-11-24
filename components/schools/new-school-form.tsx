@@ -23,7 +23,8 @@ export function NewSchoolForm({ currentSchool }: { currentSchool: string }) {
             {currentSchool}.
           </span>
           <span className="mt-2 block">
-            Give the first admin these details now. The password is not shown again.
+            Give the first admin this email and the password you set. The password is not shown
+            again.
           </span>
           <span className="mt-2 block font-mono text-sm">
             {state.issued.email}
@@ -76,7 +77,35 @@ export function NewSchoolForm({ currentSchool }: { currentSchool: string }) {
             className="h-11"
           />
         </div>
+        <div className="grid gap-1.5">
+          <Label htmlFor="admin-password">Admin password</Label>
+          <Input
+            id="admin-password"
+            name="admin_password"
+            type="password"
+            required
+            minLength={10}
+            autoComplete="new-password"
+            className="h-11"
+          />
+        </div>
+        <div className="grid gap-1.5">
+          <Label htmlFor="admin-password-confirm">Confirm password</Label>
+          <Input
+            id="admin-password-confirm"
+            name="admin_password_confirm"
+            type="password"
+            required
+            minLength={10}
+            autoComplete="new-password"
+            className="h-11"
+          />
+        </div>
       </div>
+      <p className="text-sm text-muted-foreground">
+        Use at least 10 characters with a letter and a digit. The new admin signs in with this
+        password.
+      </p>
       <SubmitButton pendingText="Creating…" className="sm:w-fit">
         Create school
       </SubmitButton>

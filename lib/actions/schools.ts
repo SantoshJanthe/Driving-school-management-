@@ -1,10 +1,10 @@
 "use server";
 
-import { temporaryPassword } from "@/lib/auth/temporary-password";
 import { requireAdmin } from "@/lib/auth/guards";
 import { DEFAULT_PACKAGES } from "@/lib/school/packages";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { resetPasswordSchema } from "@/lib/validation/auth";
 
 export type SchoolSetupState = {
   error?: string;
@@ -33,6 +33,14 @@ export async function createSchoolWithAdmin(
   if (schoolEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(schoolEmail)) {
     return { error: "Enter a valid school email." };
   }
+  const passwordParsed = resetPasswordSchema.safeParse({
+    password: formData.get("admin_password") ?? "",
+    confirm: formData.get("admin_password_confirm") ?? "",
+  });
+  if (!passwordParsed.success) {
+    return { error: passwordParsed.error.issues[0]?.message ?? "Check the admin password." };
+  }
+  const password = passwordParsed.data.password;
 
   const supabase = await createClient();
   const { data: schoolId, error: schoolError } = await supabase.rpc("create_school", {
@@ -50,7 +58,6 @@ export async function createSchoolWithAdmin(
     return { error: schoolError?.message ?? "Could not create the school." };
   }
 
-  const password = temporaryPassword();
   const admin = createAdminClient();
   const { data, error } = await admin.auth.admin.createUser({
     email: adminEmail,
