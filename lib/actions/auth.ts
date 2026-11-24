@@ -1,14 +1,16 @@
 "use server";
 
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { CONSOLE_COOKIE, type ConsoleDoor } from "@/lib/auth/console";
 import { requireProfile } from "@/lib/auth/guards";
 import { clearLoginLock, loginLockMessage, recordFailedLogin } from "@/lib/auth/lockout";
 import { createClient } from "@/lib/supabase/server";
 import { googleSignInEnabled } from "@/lib/auth/oauth";
 import { DENIAL_MESSAGES, denySession } from "@/lib/auth/session-gate";
 import { env } from "@/lib/env";
+import { isPlatformOwner } from "@/lib/subscription/config";
 import {
   forgotPasswordSchema,
   loginSchema,
@@ -82,7 +84,28 @@ export async function login(_prev: AuthFormState, formData: FormData): Promise<A
     redirect("/login/mfa");
   }
 
-  redirect(safeNextPath(parsed.data.next));
+  const door: ConsoleDoor = formData.get("door") === "software" ? "software" : "school";
+  if (door === "software" && !isPlatformOwner(parsed.data.email)) {
+    await supabase.auth.signOut();
+    return { error: "This sign-in is only for the software admin." };
+  }
+
+  const jar = await cookies();
+  jar.set(CONSOLE_COOKIE, door, {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    secure: process.env.NODE_ENV === "production",
+  });
+
+  redirect(destinationFor(door, parsed.data.next));
+}
+
+function destinationFor(door: ConsoleDoor, next: string | undefined) {
+  const dest = safeNextPath(next, door === "software" ? "/vendor/schools" : "/dashboard");
+  const control = dest.startsWith("/vendor") || dest.startsWith("/schools/new");
+  if (door === "software") return control || dest === "/settings" ? dest : "/vendor/schools";
+  return control ? "/dashboard" : dest;
 }
 
 export async function changeOwnPassword(
@@ -161,6 +184,8 @@ export async function signInWithGoogle(
 export async function logout() {
   const supabase = await createClient();
   await supabase.auth.signOut();
+  const jar = await cookies();
+  jar.set(CONSOLE_COOKIE, "", { path: "/", maxAge: 0 });
   redirect("/login");
 }
 

@@ -1,8 +1,9 @@
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { PermissionProvider } from "@/components/providers/permission-provider";
+import { CONSOLE_COOKIE } from "@/lib/auth/console";
 import { requireProfile } from "@/lib/auth/guards";
 import { isInstructorOnly } from "@/lib/auth/permissions";
 import { env } from "@/lib/env";
@@ -32,6 +33,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const softwareConsole =
+    (await cookies()).get(CONSOLE_COOKIE)?.value === "software" && isPlatformOwner(user?.email);
+  const vendorArea = pathname.startsWith("/vendor") || pathname.startsWith("/schools/new");
+  if (softwareConsole && !vendorArea && pathname !== "/settings") redirect("/vendor/schools");
+  if (!softwareConsole && vendorArea) redirect("/dashboard");
+
   const { data: school } = await supabase
     .from("schools")
     .select("name")
@@ -39,7 +46,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .maybeSingle();
 
   return (
-    <PermissionProvider profile={profile} platformOwner={isPlatformOwner(user?.email)}>
+    <PermissionProvider profile={profile} platformOwner={softwareConsole}>
       <AppShell schoolName={school?.name ?? env.appName}>{children}</AppShell>
     </PermissionProvider>
   );

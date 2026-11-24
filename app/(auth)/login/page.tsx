@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { LoginForm } from "@/components/auth/login-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -57,6 +58,12 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
             <span className="font-mono">Instructor@12345</span>
           </p>
         </div>
+        <Link
+          href="/login/software"
+          className="text-center text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+        >
+          Software admin sign-in
+        </Link>
       </CardContent>
     </Card>
   );

@@ -1,6 +1,8 @@
+import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 import type { EmailOtpType } from "@supabase/supabase-js";
 
+import { CONSOLE_COOKIE } from "@/lib/auth/console";
 import { denySession } from "@/lib/auth/session-gate";
 import { createClient } from "@/lib/supabase/server";
 import { safeNextPath } from "@/lib/validation/auth";
@@ -52,6 +54,14 @@ export async function GET(request: NextRequest) {
     await supabase.auth.signOut();
     return NextResponse.redirect(`${origin}/login?error=${denial}`);
   }
+
+  const jar = await cookies();
+  jar.set(CONSOLE_COOKIE, "school", {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    secure: process.env.NODE_ENV === "production",
+  });
 
   return NextResponse.redirect(`${origin}${next}`);
 }

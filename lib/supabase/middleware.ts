@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+import { CONSOLE_COOKIE, consoleHome } from "@/lib/auth/console";
 import type { Database } from "@/lib/database.types";
 import { env } from "@/lib/env";
 import { visitorUrl } from "@/lib/visitor-origin";
@@ -77,18 +78,25 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
+  const home = consoleHome(request.cookies.get(CONSOLE_COOKIE)?.value);
+
   if (pathname === "/" && user) {
-    return NextResponse.redirect(visitorUrl(request.headers, "/dashboard", request.nextUrl.origin));
+    return NextResponse.redirect(visitorUrl(request.headers, home, request.nextUrl.origin));
   }
 
   if (!user && !matches(pathname, PUBLIC_PATHS)) {
-    const login = visitorUrl(request.headers, "/login", request.nextUrl.origin);
+    const software = pathname.startsWith("/vendor") || pathname.startsWith("/schools/new");
+    const login = visitorUrl(
+      request.headers,
+      software ? "/login/software" : "/login",
+      request.nextUrl.origin,
+    );
     if (pathname !== "/dashboard") login.searchParams.set("next", `${pathname}${search}`);
     return NextResponse.redirect(login);
   }
 
   if (user && pathname !== "/login/mfa" && matches(pathname, AUTH_ONLY_PATHS)) {
-    return NextResponse.redirect(visitorUrl(request.headers, "/dashboard", request.nextUrl.origin));
+    return NextResponse.redirect(visitorUrl(request.headers, home, request.nextUrl.origin));
   }
 
   return response;

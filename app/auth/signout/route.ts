@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
+import { CONSOLE_COOKIE } from "@/lib/auth/console";
 import { createClient } from "@/lib/supabase/server";
 import { visitorOrigin } from "@/lib/visitor-origin";
 
@@ -17,5 +18,7 @@ export async function GET(request: NextRequest) {
   const reason = request.nextUrl.searchParams.get("reason");
   const url = new URL("/login", visitorOrigin(request.headers) ?? request.nextUrl.origin);
   if (reason && REASONS.has(reason)) url.searchParams.set("error", reason);
-  return NextResponse.redirect(url);
+  const response = NextResponse.redirect(url);
+  response.cookies.set(CONSOLE_COOKIE, "", { path: "/", maxAge: 0 });
+  return response;
 }

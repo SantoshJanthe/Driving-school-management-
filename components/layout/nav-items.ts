@@ -64,6 +64,9 @@ export function visibleNavItems(
   if (isInstructorOnly(subject)) {
     return [{ href: "/dashboard", label: "Today", icon: LayoutDashboard }];
   }
+  if (extras?.platformOwner) {
+    return NAV_ITEMS.filter((item) => item.platformOwnerOnly || item.href === "/settings");
+  }
   return NAV_ITEMS.filter((item) => {
     if (item.platformOwnerOnly) return Boolean(extras?.platformOwner);
     if (item.adminOnly) return isAdmin(subject);

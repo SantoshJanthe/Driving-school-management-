@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import Link from "next/link";
 
 import { PageHeader } from "@/components/layout/page-header";
 import { MfaPanel } from "@/components/settings/mfa-panel";
 import { PasswordForm } from "@/components/settings/password-form";
 import { SchoolForm } from "@/components/settings/school-form";
+import { CONSOLE_COOKIE } from "@/lib/auth/console";
 import { requireProfile } from "@/lib/auth/guards";
 import { isAdmin, isInstructorOnly } from "@/lib/auth/permissions";
 import { formatINR } from "@/lib/format";
@@ -21,7 +23,8 @@ export default async function SettingsPage() {
   const {
     data: { user },
   } = await (await createClient()).auth.getUser();
-  const owner = isPlatformOwner(user?.email);
+  const softwareConsole =
+    (await cookies()).get(CONSOLE_COOKIE)?.value === "software" && isPlatformOwner(user?.email);
   const admin = isAdmin(profile);
   const limited = profile.role === "student" || isInstructorOnly(profile);
   const packages = school?.packages ?? DEFAULT_PACKAGES;
@@ -31,10 +34,14 @@ export default async function SettingsPage() {
       <PageHeader
         title="Settings"
         description={
-          limited ? "Change your own password." : "Branch contact and your own password."
+          softwareConsole
+            ? "Software admin password."
+            : limited
+              ? "Change your own password."
+              : "Branch contact and your own password."
         }
       />
-      {owner ? (
+      {softwareConsole ? (
         <p className="rounded-2xl border border-black/10 bg-[#fffcf7] p-4 text-sm">
           You can open every school and verify software subscription payments.{" "}
           <Link href="/vendor/schools" className="underline underline-offset-4">
@@ -47,8 +54,8 @@ export default async function SettingsPage() {
         </p>
       ) : null}
       <PasswordForm />
-      {admin ? <MfaPanel /> : null}
-      {!limited && school ? (
+      {softwareConsole || !admin ? null : <MfaPanel />}
+      {softwareConsole || limited ? null : school ? (
         admin ? (
           <>
             <SchoolForm
@@ -99,9 +106,9 @@ export default async function SettingsPage() {
             </section>
           </div>
         )
-      ) : !limited ? (
+      ) : (
         <p className="text-sm text-muted-foreground">School details are not available.</p>
-      ) : null}
+      )}
     </div>
   );
 }

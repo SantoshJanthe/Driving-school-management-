@@ -14,10 +14,12 @@ export function LoginForm({
   next,
   initialError,
   google = false,
+  door = "school",
 }: {
   next?: string;
   initialError?: string;
   google?: boolean;
+  door?: "school" | "software";
 }) {
   const [state, formAction] = useActionState(login, initialState);
   const [googleState, googleAction] = useActionState(signInWithGoogle, initialState);
@@ -25,6 +27,7 @@ export function LoginForm({
 
   return (
     <form action={formAction} className="grid gap-4" noValidate>
+      <input type="hidden" name="door" value={door} />
       {next ? <input type="hidden" name="next" value={next} /> : null}
 
       {error ? (
