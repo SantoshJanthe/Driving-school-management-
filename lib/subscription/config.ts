@@ -23,10 +23,6 @@ export function paymentConfig(): PaymentConfig {
   };
 }
 
-export function paymentReady(config: PaymentConfig) {
-  return config.monthlyFee !== null && (config.upiId !== null || config.bankDetails !== null);
-}
-
 /** Emails allowed to verify subscription payments. Compared with the signed-in auth email. */
 export function isPlatformOwner(email: string | null | undefined) {
   if (!email) return false;

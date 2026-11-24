@@ -602,9 +602,30 @@ export type Database = {
         };
         Update: {
           status?: string;
+          payment_reference?: string;
           review_note?: string | null;
           reviewed_by?: string | null;
           reviewed_at?: string | null;
+        };
+        Relationships: [];
+      };
+      platform_settings: {
+        Row: {
+          key: string;
+          value: Json;
+          updated_by: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          key: string;
+          value: Json;
+          updated_by?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          value?: Json;
+          updated_by?: string | null;
+          updated_at?: string;
         };
         Relationships: [];
       };

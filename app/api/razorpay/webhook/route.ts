@@ -1,6 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Enums } from "@/lib/database.types";
 import { verifyRazorpayWebhook } from "@/lib/razorpay/server";
+import { markRazorpayPaid } from "@/lib/subscription/requests";
 
 export const runtime = "nodejs";
 
@@ -47,6 +48,23 @@ export async function POST(request: Request) {
   const payment = asRecord(asRecord(payload?.payment)?.entity);
   const link = asRecord(asRecord(payload?.payment_link)?.entity);
   const notes = { ...notesOf(payment), ...notesOf(link) };
+
+  if (notes.subscription_request_id) {
+    const linkId = typeof link?.id === "string" ? link.id : "";
+    const paymentId = typeof payment?.id === "string" ? payment.id : "";
+    const paid = typeof payment?.amount === "number" ? payment.amount : null;
+    if (!linkId || !paymentId || paid === null) {
+      return Response.json({ ok: true, ignored: "missing link" });
+    }
+    await markRazorpayPaid({
+      requestId: notes.subscription_request_id,
+      linkId,
+      paymentId,
+      amountPaise: paid,
+    });
+    return Response.json({ ok: true });
+  }
+
   const applicantId = notes.applicant_id;
   const schoolId = notes.school_id;
   const paymentId = typeof payment?.id === "string" ? payment.id : "";

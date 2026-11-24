@@ -41,9 +41,11 @@ export default async function SubscribeStatusPage({
         {request.status === "pending" ? "Checking your payment" : "Payment not verified"}
       </p>
       <h1 className="mt-2 text-2xl font-medium tracking-tight">
-        {request.status === "pending"
-          ? "We are matching your transaction ID with the bank."
-          : "We could not match this payment."}
+        {request.status !== "pending"
+          ? "We could not match this payment."
+          : request.payment_method === "razorpay"
+            ? "Waiting for Razorpay to confirm the payment."
+            : "We are matching your transaction ID with the bank."}
       </h1>
       <dl className="mt-6 grid gap-2 text-sm sm:grid-cols-[10rem_1fr]">
         <dt className="text-muted-foreground">School</dt>
@@ -62,7 +64,7 @@ export default async function SubscribeStatusPage({
         <div className="mt-6 grid gap-2 text-sm">
           {request.review_note ? <p>Note from the vendor: {request.review_note}</p> : null}
           <Link href="/#subscribe" className="underline underline-offset-4">
-            Send the payment reference again
+            Try the payment again
           </Link>
         </div>
       )}

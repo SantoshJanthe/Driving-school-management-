@@ -134,15 +134,14 @@ Do not paste the secret into chat, and do not commit `.env.local`. Switch to liv
 
 ## Software subscription
 
-The landing page sells the software as a monthly subscription per school, paid by UPI or bank transfer.
+The landing page sells the software as a monthly subscription per school. The owner chooses the payment methods under **Payment methods on the landing page** at `/vendor/subscriptions`: Razorpay, manual UPI or bank transfer, or both. Manual is on by default.
 
-1. Set `SUBSCRIPTION_MONTHLY_FEE` and at least one of `PAYMENT_UPI_ID` or `PAYMENT_BANK_DETAILS` in `.env.local`. Until then, the landing page says the fee is not published and shows no form.
-2. Set `PLATFORM_OWNER_EMAILS` to the sign-in emails that may check payments.
-3. A buyer pays, then sends the transaction ID or UTR. Their status page refreshes every 10 seconds.
-4. The owner signs in, opens **Settings → Open subscription payments** (`/vendor/subscriptions`), matches the reference with the bank statement, and clicks **Verify payment** or **Reject**.
-5. After verification the buyer’s page opens `/download`, which offers the Android APK and install steps for laptop and iPhone. The APK link only works for a verified payment.
+1. Set `SUBSCRIPTION_MONTHLY_FEE` and `PLATFORM_OWNER_EMAILS` (the sign-in emails that may manage payments) in `.env.local`.
+2. **Razorpay:** set `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, and `RAZORPAY_WEBHOOK_SECRET`, and add the webhook `/api/razorpay/webhook` for `payment_link.paid`. The buyer pays on a Razorpay payment link. The signed return link or the webhook marks the payment verified, and the download opens without a manual check. Until the keys are set, the method shows **Not connected** and the landing page does not offer it.
+3. **Manual UPI or bank transfer:** set `PAYMENT_UPI_ID` or `PAYMENT_BANK_DETAILS`. The buyer pays, sends the transaction ID or UTR, and the owner clicks **Verify payment** or **Reject** after matching it with the bank statement.
+4. The buyer’s status page refreshes every 10 seconds. After verification it opens `/download`, which offers the Android APK and install steps for laptop and iPhone. The APK link only works for a verified payment.
 
-Payment rows live in `public.subscription_requests`. RLS is on with no policies; only the server reads them with the service role.
+The landing page shows only the methods that are switched on and fully set up; with none, it says the fee is not published yet. Payment rows live in `public.subscription_requests` and the method choice in `public.platform_settings`. RLS is on for both with no policies; only the server reads them with the service role.
 
 ## Apps for laptop and phone
 

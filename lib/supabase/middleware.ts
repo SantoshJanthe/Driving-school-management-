@@ -18,6 +18,8 @@ const PUBLIC_PATHS = [
   "/subscribe",
   "/download",
   "/api/download",
+  "/api/subscription",
+  "/api/razorpay/webhook",
   "/api/branding",
   "/manifest.webmanifest",
   "/sw.js",

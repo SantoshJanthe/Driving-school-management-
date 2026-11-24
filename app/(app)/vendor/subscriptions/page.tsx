@@ -9,13 +9,20 @@ import { requireProfile } from "@/lib/auth/guards";
 import { rejectSubscription, verifySubscription } from "@/lib/actions/subscription";
 import { formatDateTime, formatINR } from "@/lib/format";
 import { isPlatformOwner } from "@/lib/subscription/config";
+import { offeredMethods } from "@/lib/subscription/methods";
 import { listRequests } from "@/lib/subscription/requests";
+import { PaymentMethodsForm } from "@/components/vendor/payment-methods-form";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Subscriptions" };
 export const dynamic = "force-dynamic";
 
 const STATUS_LABEL = { pending: "Waiting", verified: "Verified", rejected: "Rejected" } as const;
+const METHOD_LABEL: Record<string, string> = {
+  upi: "UPI",
+  bank: "bank transfer",
+  razorpay: "Razorpay",
+};
 
 export default async function VendorSubscriptionsPage() {
   await requireProfile();
@@ -25,13 +32,20 @@ export default async function VendorSubscriptionsPage() {
   } = await supabase.auth.getUser();
   if (!user || !isPlatformOwner(user.email)) redirect("/dashboard?denied=vendor");
 
-  const requests = await listRequests();
+  const [requests, offered] = await Promise.all([listRequests(), offeredMethods()]);
 
   return (
     <div className="grid gap-6">
       <PageHeader
         title="Subscription payments"
-        description="Match each transaction ID with your bank statement. Verifying opens the app download for that school."
+        description="Razorpay payments verify themselves. Match each manual transaction ID with your bank statement; verifying opens the app download for that school."
+      />
+      <PaymentMethodsForm
+        razorpay={offered.choice.razorpay}
+        manual={offered.choice.manual}
+        razorpayConnected={offered.razorpayConnected}
+        manualReady={offered.manualReady}
+        hasFee={offered.config.monthlyFee !== null}
       />
       {requests.length === 0 ? (
         <p className="text-sm text-muted-foreground">No payment references yet.</p>
@@ -52,7 +66,7 @@ export default async function VendorSubscriptionsPage() {
                 </Badge>
               </div>
               <p className="text-sm">
-                {formatINR(item.amount_inr)} by {item.payment_method === "upi" ? "UPI" : "bank transfer"} ·{" "}
+                {formatINR(item.amount_inr)} by {METHOD_LABEL[item.payment_method] ?? item.payment_method} ·{" "}
                 <span className="font-mono">{item.payment_reference}</span> · sent{" "}
                 {formatDateTime(item.created_at)}
               </p>

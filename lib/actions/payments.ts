@@ -1,12 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
 
 import { requireAdmin, requirePermission } from "@/lib/auth/guards";
 import { createRazorpayPaymentLink, razorpayStatus } from "@/lib/razorpay/server";
+import { publicOrigin } from "@/lib/request-origin";
 import { createClient } from "@/lib/supabase/server";
-import { env } from "@/lib/env";
 
 export type PaymentLinkState = {
   error?: string;
@@ -149,15 +148,6 @@ function rupeesToPaise(raw: string): number | null {
   return paise;
 }
 
-async function publicOrigin() {
-  const headerStore = await headers();
-  const host = headerStore.get("x-forwarded-host") ?? headerStore.get("host");
-  const proto =
-    headerStore.get("x-forwarded-proto") ?? (host?.includes("localhost") ? "http" : "https");
-  if (host) return `${proto}://${host}`;
-  return env.appUrl;
-}
-
 export async function createPaymentLink(
   _prev: PaymentLinkState,
   formData: FormData,
@@ -188,8 +178,8 @@ export async function createPaymentLink(
     const link = await createRazorpayPaymentLink({
       amountPaise: paise,
       description: description.slice(0, 255),
-      applicantId: applicant.id,
-      schoolId: applicant.school_id,
+      referenceId: `${applicant.id.slice(0, 8)}-${Date.now()}`,
+      notes: { applicant_id: applicant.id, school_id: applicant.school_id },
       name: applicant.full_name,
       contact: applicant.phone,
       email: applicant.email,

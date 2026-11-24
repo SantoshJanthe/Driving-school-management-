@@ -52,8 +52,8 @@ export type PaymentLinkResult = {
 export async function createRazorpayPaymentLink(input: {
   amountPaise: number;
   description: string;
-  applicantId: string;
-  schoolId: string;
+  referenceId: string;
+  notes: Record<string, string>;
   name: string;
   contact: string;
   email: string | null;
@@ -76,7 +76,7 @@ export async function createRazorpayPaymentLink(input: {
       currency: "INR",
       accept_partial: false,
       description: input.description,
-      reference_id: `${input.applicantId.slice(0, 8)}-${Date.now()}`,
+      reference_id: input.referenceId.slice(0, 40),
       customer: {
         name: input.name,
         contact: input.contact,
@@ -84,10 +84,7 @@ export async function createRazorpayPaymentLink(input: {
       },
       notify: { sms: false, email: false },
       reminder_enable: false,
-      notes: {
-        applicant_id: input.applicantId,
-        school_id: input.schoolId,
-      },
+      notes: input.notes,
       callback_url: input.callbackUrl,
       callback_method: "get",
     }),
@@ -113,12 +110,33 @@ export async function createRazorpayPaymentLink(input: {
   };
 }
 
+function safeEqualHex(expected: string, actual: string) {
+  const a = Buffer.from(expected);
+  const b = Buffer.from(actual);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
+/**
+ * Checks the query Razorpay adds when it sends the payer back from a payment link.
+ * The signature is HMAC-SHA256 of `link_id|reference_id|status|payment_id` with the key secret.
+ */
+export function verifyPaymentLinkCallback(params: {
+  linkId: string;
+  referenceId: string;
+  status: string;
+  paymentId: string;
+  signature: string;
+}): boolean {
+  const secret = keySecret();
+  if (!secret || !params.signature) return false;
+  const payload = `${params.linkId}|${params.referenceId}|${params.status}|${params.paymentId}`;
+  const expected = createHmac("sha256", secret).update(payload).digest("hex");
+  return safeEqualHex(expected, params.signature);
+}
+
 export function verifyRazorpayWebhook(rawBody: string, signature: string | null): boolean {
   const secret = process.env.RAZORPAY_WEBHOOK_SECRET?.trim() ?? "";
   if (!secret || !signature) return false;
   const expected = createHmac("sha256", secret).update(rawBody).digest("hex");
-  const a = Buffer.from(expected);
-  const b = Buffer.from(signature);
-  if (a.length !== b.length) return false;
-  return timingSafeEqual(a, b);
+  return safeEqualHex(expected, signature);
 }

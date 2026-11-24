@@ -43,6 +43,41 @@ export async function requestForToken(token: string | undefined | null) {
   return data as SubscriptionRequest;
 }
 
+/**
+ * Marks a Razorpay subscription paid once Razorpay confirms it, either through the
+ * signed return link or the signed webhook. The amount must cover the fee on the request.
+ */
+export async function markRazorpayPaid(input: {
+  requestId: string;
+  linkId: string;
+  paymentId: string;
+  amountPaise: number | null;
+}) {
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from("subscription_requests")
+    .select("id, amount_inr, payment_method, payment_reference, status")
+    .eq("id", input.requestId)
+    .maybeSingle();
+  if (!data || data.payment_method !== "razorpay" || data.payment_reference !== input.linkId) {
+    return false;
+  }
+  if (data.status === "verified") return true;
+  if (input.amountPaise !== null && input.amountPaise < Math.round(Number(data.amount_inr) * 100)) {
+    return false;
+  }
+  const { error } = await admin
+    .from("subscription_requests")
+    .update({
+      status: "verified",
+      review_note: `Paid on Razorpay (${input.paymentId})`.slice(0, 300),
+      reviewed_at: new Date().toISOString(),
+    })
+    .eq("id", input.requestId)
+    .eq("status", "pending");
+  return !error;
+}
+
 export async function listRequests() {
   const { data, error } = await createAdminClient()
     .from("subscription_requests")

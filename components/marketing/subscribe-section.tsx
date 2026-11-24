@@ -1,11 +1,25 @@
+import { RazorpaySubscribeForm } from "@/components/marketing/razorpay-subscribe-form";
 import { SubscribeForm } from "@/components/marketing/subscribe-form";
 import { formatINR } from "@/lib/format";
-import { paymentConfig, paymentReady, upiLink } from "@/lib/subscription/config";
+import { upiLink } from "@/lib/subscription/config";
+import { offeredMethods } from "@/lib/subscription/methods";
 
-export function SubscribeSection() {
-  const config = paymentConfig();
-  const ready = paymentReady(config);
+export async function SubscribeSection() {
+  const offered = await offeredMethods();
+  const { config } = offered;
+  const ready = offered.razorpay || offered.manual;
   const link = upiLink(config);
+  const amountLabel = formatINR(config.monthlyFee);
+
+  let intro =
+    "Pay the monthly fee, and this page opens the download for your laptop and Android phone once the payment is confirmed.";
+  if (offered.razorpay && !offered.manual) {
+    intro =
+      "Pay the monthly fee on Razorpay. The download for your laptop and Android phone opens as soon as Razorpay confirms the payment.";
+  } else if (offered.manual && !offered.razorpay) {
+    intro =
+      "Pay the monthly fee by UPI or bank transfer, then send the transaction ID. Once the payment is verified, this page opens the download for your laptop and Android phone.";
+  }
 
   return (
     <section
@@ -20,18 +34,15 @@ export function SubscribeSection() {
         <h2 id="subscribe-heading" className="text-2xl font-medium tracking-tight md:text-3xl">
           Get the app for your school
         </h2>
-        <p className="text-sm text-muted-foreground">
-          Pay the monthly fee by UPI or bank transfer, then send the transaction ID. Once the payment
-          is verified, this page opens the download for your laptop and Android phone.
-        </p>
+        <p className="text-sm text-muted-foreground">{intro}</p>
         {ready ? (
           <div className="grid gap-3 rounded-2xl border border-black/10 bg-white/70 p-4 text-sm">
             <p className="text-3xl font-medium">
-              {formatINR(config.monthlyFee)}
+              {amountLabel}
               <span className="text-sm font-normal text-muted-foreground"> per school, per month</span>
             </p>
-            {config.payeeName ? <p>Pay to {config.payeeName}</p> : null}
-            {config.upiId ? (
+            {offered.manual && config.payeeName ? <p>Pay to {config.payeeName}</p> : null}
+            {offered.manual && config.upiId ? (
               <p>
                 UPI ID <span className="font-mono">{config.upiId}</span>
                 {link ? (
@@ -45,7 +56,7 @@ export function SubscribeSection() {
                 ) : null}
               </p>
             ) : null}
-            {config.bankDetails ? (
+            {offered.manual && config.bankDetails ? (
               <p className="whitespace-pre-line">{config.bankDetails}</p>
             ) : null}
           </div>
@@ -56,7 +67,22 @@ export function SubscribeSection() {
         )}
       </div>
       {ready ? (
-        <SubscribeForm hasUpi={config.upiId !== null} hasBank={config.bankDetails !== null} />
+        <div className="grid content-start gap-8">
+          {offered.razorpay ? (
+            <div className="grid gap-3">
+              <h3 className="text-lg font-medium">Pay online with Razorpay</h3>
+              <RazorpaySubscribeForm amountLabel={amountLabel} />
+            </div>
+          ) : null}
+          {offered.manual ? (
+            <div className="grid gap-3">
+              <h3 className="text-lg font-medium">
+                {offered.razorpay ? "Or pay by UPI or bank transfer" : "Send your payment reference"}
+              </h3>
+              <SubscribeForm hasUpi={config.upiId !== null} hasBank={config.bankDetails !== null} />
+            </div>
+          ) : null}
+        </div>
       ) : null}
     </section>
   );
