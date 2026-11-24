@@ -132,6 +132,29 @@ RAZORPAY_KEY_SECRET=...
 
 Do not paste the secret into chat, and do not commit `.env.local`. Switch to live keys only when you are ready to take real payments.
 
+## Software subscription
+
+The landing page sells the software as a monthly subscription per school, paid by UPI or bank transfer.
+
+1. Set `SUBSCRIPTION_MONTHLY_FEE` and at least one of `PAYMENT_UPI_ID` or `PAYMENT_BANK_DETAILS` in `.env.local`. Until then, the landing page says the fee is not published and shows no form.
+2. Set `PLATFORM_OWNER_EMAILS` to the sign-in emails that may check payments.
+3. A buyer pays, then sends the transaction ID or UTR. Their status page refreshes every 10 seconds.
+4. The owner signs in, opens **Settings → Open subscription payments** (`/vendor/subscriptions`), matches the reference with the bank statement, and clicks **Verify payment** or **Reject**.
+5. After verification the buyer’s page opens `/download`, which offers the Android APK and install steps for laptop and iPhone. The APK link only works for a verified payment.
+
+Payment rows live in `public.subscription_requests`. RLS is on with no policies; only the server reads them with the service role.
+
+## Apps for laptop and phone
+
+- **Laptop, iPhone, any browser:** the signed-in app is an installable web app (`app/manifest.ts`, `public/sw.js`). It opens at `/dashboard`. Chrome and Edge show an install button; on iPhone use Share → Add to Home Screen.
+- **Android APK:** `android/` is a Capacitor project that opens the live site. It needs JDK 21 and the Android SDK (platform 36).
+
+```bash
+APP_SERVER_URL=https://your-live-site.example npm run android:apk
+```
+
+This builds a debug-signed APK and copies it to `var/downloads/motor-driving-school-software.apk`, where `/download` serves it. Rebuild whenever the site address changes. For the Play Store, sign a release build with your own keystore and keep that keystore out of git.
+
 ## Scheduled database backup
 
 `crontab` is not available on this machine, so a daily job was not installed. The schedule below is the step to run on a host that has cron.
