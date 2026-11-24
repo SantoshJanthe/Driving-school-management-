@@ -34,19 +34,21 @@ export default async function SettingsPage() {
       {admin ? <MfaPanel /> : null}
       {!limited && school ? (
         admin ? (
-          <SchoolForm
-            name={school.name}
-            address={school.address ?? ""}
-            phone={school.contact_phone ?? ""}
-            email={school.email ?? ""}
-          />
-          <p className="text-sm text-muted-foreground">
-            Course names, fees, and session counts are edited on the{" "}
-            <Link href="/courses" className="underline underline-offset-4">
-              Courses
-            </Link>{" "}
-            page.
-          </p>
+          <>
+            <SchoolForm
+              name={school.name}
+              address={school.address ?? ""}
+              phone={school.contact_phone ?? ""}
+              email={school.email ?? ""}
+            />
+            <p className="text-sm text-muted-foreground">
+              Course names, fees, and session counts are edited on the{" "}
+              <Link href="/courses" className="underline underline-offset-4">
+                Courses
+              </Link>{" "}
+              page.
+            </p>
+          </>
         ) : (
           <div className="grid gap-6">
             <section className="grid gap-2">
