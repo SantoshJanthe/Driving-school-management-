@@ -16,6 +16,7 @@
     "db:reset": "supabase db reset",
     "db:types": "supabase gen types typescript --local --schema public > lib/database.types.ts && prettier --write lib/database.types.ts",
     "android:apk": "cap sync android && cd android && ./gradlew assembleDebug && mkdir -p ../var/downloads && cp app/build/outputs/apk/debug/app-debug.apk ../var/downloads/motor-driving-school-software.apk",
+    "ios:sync": "cap sync ios",
     "db:test": "psql \"${SUPABASE_DB_URL:-postgresql://postgres:postgres@127.0.0.1:54322/postgres}\" -v ON_ERROR_STOP=1 -f supabase/tests/rls.sql"
   },
   "dependencies": {
@@ -39,6 +40,7 @@
     "@capacitor/android": "^8.6.2",
     "@capacitor/cli": "^8.6.2",
     "@capacitor/core": "^8.6.2",
+    "@capacitor/ios": "^8.6.2",
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",

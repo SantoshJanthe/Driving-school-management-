@@ -71,8 +71,16 @@ export default async function DownloadPage({
         </section>
 
         <section className="grid gap-3 rounded-2xl border border-black/10 bg-white/70 p-5">
-          <h2 className="text-lg font-medium">Laptop, iPhone, or any browser</h2>
+          <h2 className="text-lg font-medium">iPhone</h2>
           <InstallAppButton />
+          <p className="text-sm text-muted-foreground">
+            On iPhone, use Share → Add to Home Screen. The office can also open the native iOS
+            project on a Mac (see the README) when they are ready for TestFlight.
+          </p>
+        </section>
+
+        <section className="grid gap-3 rounded-2xl border border-black/10 bg-white/70 p-5">
+          <h2 className="text-lg font-medium">Laptop or any browser</h2>
           <Link href="/dashboard" className="w-fit text-sm underline underline-offset-4">
             Open the app in this browser
           </Link>

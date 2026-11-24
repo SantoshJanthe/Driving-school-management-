@@ -147,6 +147,12 @@ The landing page shows only the methods that are switched on and fully set up; w
 
 - **Laptop, iPhone, any browser:** the signed-in app is an installable web app (`app/manifest.ts`, `public/sw.js`). It opens at `/dashboard`. Chrome and Edge show an install button; on iPhone use Share → Add to Home Screen.
 - **Android APK:** `android/` is a Capacitor project that opens the live site. It needs JDK 21 and the Android SDK (platform 36).
+- **iOS:** `ios/` is the matching Capacitor project. It is reviewed against [felixgr/secure-ios-app-dev](https://github.com/felixgr/secure-ios-app-dev) (a security checklist, not an app store binary). Details are in `ios/SECURITY.md`. You need a Mac, Xcode 15+, and an Apple Developer team:
+
+```bash
+APP_SERVER_URL=https://your-live-site.example npm run ios:sync
+open ios/App/App.xcodeproj
+```
 
 ```bash
 APP_SERVER_URL=https://your-live-site.example npm run android:apk

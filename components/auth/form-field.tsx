@@ -41,7 +41,7 @@ export function FormField({ label, name, error, hint, className, ...props }: For
   );
 }
 
-/** Password input with a show/hide toggle. */
+/** Password input with a show/hide toggle. Autocorrect stays off even when shown. */
 export function PasswordField({ className, ...props }: FormFieldProps) {
   const [visible, setVisible] = useState(false);
   return (
@@ -49,6 +49,9 @@ export function PasswordField({ className, ...props }: FormFieldProps) {
       <FormField
         {...props}
         type={visible ? "text" : "password"}
+        autoCapitalize="none"
+        autoCorrect="off"
+        spellCheck={false}
         className={cn("pr-11", className)}
       />
       <button
